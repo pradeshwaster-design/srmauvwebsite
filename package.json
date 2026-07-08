@@ -1,0 +1,56 @@
+{
+  "name": "srmauv-website",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Official website for Team SRM AUV — A multidisciplinary student engineering team building intelligent autonomous underwater vehicles at SRM Institute of Science and Technology, Chennai.",
+  "author": "Team SRM AUV <team-srm-auv@srmist.edu.in>",
+  "license": "MIT",
+  "homepage": "https://github.com/pradeshwaster-design/srmauvwebsite#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pradeshwaster-design/srmauvwebsite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pradeshwaster-design/srmauvwebsite/issues"
+  },
+  "keywords": [
+    "react",
+    "vite",
+    "tailwindcss",
+    "auv",
+    "underwater-robotics",
+    "robosub",
+    "srmist",
+    "student-team",
+    "autonomous-vehicles",
+    "marine-robotics"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@tailwindcss/vite": "^4.2.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "tailwindcss": "^4.2.1",
+    "vite": "^7.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

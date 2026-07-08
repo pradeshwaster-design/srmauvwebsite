@@ -1,0 +1,2496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team SRM AUV — Engineering Depths, Navigating Future</title>
+  <meta name="description" content="Team SRM AUV is a multidisciplinary student engineering team from SRM IST dedicated to underwater robotics since 2013." />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020C1B; color: #fff; overflow-x: hidden; }
+    #root { min-height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+
+const { useState, useEffect, useRef } = React;
+
+/* mobile breakpoint hook */
+function useIsMobile() {
+  const [m, setM] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const h = () => setM(window.innerWidth < 768);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, []);
+  return m;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════════ */
+const C = {
+  bg0: "#020C1B",
+  bg1: "#0A192F",
+  bg2: "#0D2137",
+  bg3: "#112240",
+  accent: "#00E5FF",
+  accent2: "#0077B6",
+  accent3: "#48CAE4",
+  text: "rgba(200,220,255,0.85)",
+  muted: "rgba(200,220,255,0.45)",
+  border: "rgba(0,229,255,0.12)",
+  borderHover: "rgba(0,229,255,0.35)",
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   PHOTO ASSETS  (Google Drive direct links)
+═══════════════════════════════════════════════════════════════ */
+const PHOTOS = {
+  faculty:        "https://i.ibb.co/0jskFvSc/Screenshot-2026-03-02-015352.png",
+  logo:           "https://i.ibb.co/VYm2DTwr/Screenshot-2026-03-02-015708.png",
+  teamLead:       "https://i.ibb.co/mVz9390y/Meet-our-dive-leads-team-leads-for-25-26-leader-srm-srmist-leadership.jpg",
+  teamManager:    "https://i.ibb.co/tpSXzLYZ/Meet-our-dive-leads-team-leads-for-25-26-leader-srm-srmist-leadership-1.jpg",
+  mechanicalLead: "https://i.ibb.co/4nRSCfwB/Meet-our-dive-leads-team-leads-for-25-26-leader-srm-srmist-leadership-2.jpg",
+  softwareLead:   "https://i.ibb.co/ccSYx964/Meet-our-dive-leads-team-leads-for-25-26-leader-srm-srmist-leadership-3.jpg",
+  electricalLead: "https://i.ibb.co/sd0whtxD/Meet-our-dive-leads-team-leads-for-25-26-leader-srm-srmist-leadership-4.jpg",
+  team:           "https://i.ibb.co/zh1wsBGb/Screenshot-2026-03-02-004843.png",
+  tacComp:        "https://i.ibb.co/Y7tcwTLJ/Screenshot-2026-03-02-005058.png",
+  sedna:          "https://i.ibb.co/nNDFNh0v/Screenshot-2026-03-02-004950.png",
+  alpheus:        "https://i.ibb.co/sdzGHGtF/Screenshot-2026-03-02-005003.png",
+  zarna:          "https://i.ibb.co/0jBrJn0p/Screenshot-2026-03-02-005013.png",
+  vatkhd:         "https://i.ibb.co/zTT6b4Sq/Screenshot-2026-03-02-005021.png",
+  nemo:           "https://i.ibb.co/qMCsmrR5/Screenshot-2026-03-02-005033.png",
+  marinaWin:      "https://i.ibb.co/qYV2vpwN/Screenshot-2026-03-02-005046.png",
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL STYLES
+═══════════════════════════════════════════════════════════════ */
+const GlobalStyle = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body { background:${C.bg0}; color:#fff; font-family:'Syne',sans-serif; overflow-x:hidden; }
+    ::-webkit-scrollbar { width:3px; }
+    ::-webkit-scrollbar-track { background:${C.bg0}; }
+    ::-webkit-scrollbar-thumb { background:rgba(0,229,255,0.25); border-radius:2px; }
+    ::placeholder { color:rgba(200,220,255,0.2); }
+    @keyframes fadeUp   { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+    @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+    @keyframes glow     { 0%,100%{text-shadow:0 0 20px rgba(0,229,255,0.4)} 50%{text-shadow:0 0 40px rgba(0,229,255,0.8),0 0 80px rgba(0,229,255,0.3)} }
+    @keyframes shine    { to{background-position:200% center} }
+    @keyframes float    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    @keyframes pulse    { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+    @keyframes scanline { 0%{transform:translateY(-100%)} 100%{transform:translateY(100vh)} }
+    @keyframes rotate   { to{transform:rotate(360deg)} }
+    @keyframes slideRight { from{transform:translateX(-20px);opacity:0} to{transform:none;opacity:1} }
+    .page-enter { animation: fadeUp .6s ease both; }
+    .hover-lift { transition:transform .3s,box-shadow .3s; }
+    .hover-lift:hover { transform:translateY(-6px); }
+    @media(max-width:768px){
+      .hamburger{display:block!important}
+      .desktop-nav{display:none!important}
+      .two-col{grid-template-columns:1fr!important; gap:32px!important}
+      .two-col-contact{grid-template-columns:1fr!important; gap:32px!important}
+      .footer-grid{grid-template-columns:1fr 1fr!important; gap:24px!important}
+      .form-row{grid-template-columns:1fr!important}
+      .faculty-grid{grid-template-columns:1fr!important; text-align:center; gap:20px!important}
+      .faculty-grid>div:first-child{margin:0 auto!important}
+      .nemo-grid{grid-template-columns:1fr!important; gap:32px!important}
+      .stats-row{gap:20px!important; padding:0 1rem}
+      /* Reduce font sizes on mobile */
+      nav { padding: 0 1rem !important; }
+      /* Prevent overflow on all sections */
+      section, div { max-width: 100vw; }
+      /* Better touch targets */
+      button { min-height: 40px; }
+      /* Tighten footer on mobile */
+      footer { padding: 40px 1rem 24px !important; }
+    }
+    @media(max-width:480px){
+      .footer-grid{grid-template-columns:1fr!important}
+    }
+    @media(max-width:600px){
+      .back-label{ display: inline !important; }
+    }
+  `}</style>
+);
+
+/* ═══════════════════════════════════════════════════════════════
+   UNDERWATER SCENE — Full immersive canvas with fish, jellyfish,
+   bubbles, seaweed, light rays, particles
+═══════════════════════════════════════════════════════════════ */
+function UnderwaterScene({ intensity = 1 }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const c = ref.current; if (!c) return;
+    const ctx = c.getContext('2d');
+    let raf, W, H, t = 0;
+
+    // ── Entity pools ──────────────────────────────────────────
+    const rand = (a, b) => a + Math.random() * (b - a);
+    const randInt = (a, b) => Math.floor(rand(a, b));
+
+    // Bubbles
+    const bubbles = Array.from({ length: Math.floor(60 * intensity) }, () => ({
+      x: rand(0, 1), y: rand(0, 1.2),
+      r: rand(1.5, 6),
+      vy: rand(0.0003, 0.0009),
+      vx: rand(-0.0001, 0.0001),
+      wobble: rand(0, Math.PI * 2),
+      wobbleSpeed: rand(0.01, 0.03),
+      wobbleAmp: rand(0.001, 0.004),
+      alpha: rand(0.15, 0.55),
+    }));
+
+    // Fish
+    const FISH_COLORS = ['rgba(0,229,255,', 'rgba(72,202,228,', 'rgba(0,180,216,', 'rgba(144,224,239,', 'rgba(255,140,60,', 'rgba(255,200,80,', 'rgba(180,120,255,'];
+    const fish = Array.from({ length: Math.floor(12 * intensity) }, () => ({
+      x: rand(-0.3, 1.3), y: rand(0.1, 0.9),
+      vx: rand(-0.0008, 0.0008) || 0.0004,
+      vy: rand(-0.0001, 0.0001),
+      size: rand(8, 22),
+      color: FISH_COLORS[randInt(0, FISH_COLORS.length)],
+      alpha: rand(0.25, 0.7),
+      tailPhase: rand(0, Math.PI * 2),
+      tailSpeed: rand(0.08, 0.18),
+      wobble: rand(0, Math.PI * 2),
+    }));
+
+    // Jellyfish
+    const jellies = Array.from({ length: Math.floor(5 * intensity) }, () => ({
+      x: rand(0.02, 0.98), y: rand(0.05, 0.75),
+      vy: rand(-0.00015, 0.00015),
+      vx: rand(-0.00008, 0.00008),
+      size: rand(18, 60),
+      phase: rand(0, Math.PI * 2),
+      pulseSpeed: rand(0.012, 0.028),
+      alpha: rand(0.35, 0.72),
+      hue: randInt(160, 300),
+      glowRadius: rand(1.2, 2.2),
+    }));
+
+    // Coral reefs (clusters at the bottom)
+    const coralClusters = Array.from({ length: 8 }, (_, i) => ({
+      x: 0.04 + (i / 7) * 0.92,
+      y: 1.0,
+      phase: rand(0, Math.PI * 2),
+      scale: rand(0.45, 0.78),
+      hue1: [5, 18, 345, 28, 195, 155, 275, 40][i],
+      hue2: [20, 38, 0, 50, 210, 170, 290, 55][i],
+      type: i % 3, // 0=branching, 1=fan, 2=mixed
+    }));
+
+    // AUV — torpedo-style, linear approach-inspect-depart
+    const sortedCorals = [...coralClusters].sort((a, b) => a.x - b.x);
+    const auv = {
+      x: -0.1, y: 0.80,
+      angle: 0,
+      speed: 0.00055,
+      thrusterPhase: 0,
+      scanPhase: 0,
+      bobPhase: rand(0, Math.PI * 2),
+      targetIdx: 0,
+      state: 'cruise',   // 'cruise' | 'slowdown' | 'hover' | 'pan' | 'depart'
+      timer: 0,
+      scanBeamAlpha: 0,
+      thrusterBubbles: [],
+      lightFlicker: 1,
+      // waypoint for smooth steering
+      wpX: 0, wpY: 0,
+    };
+
+    // Whale (1)
+    const whale = {
+      x: rand(0.1, 0.9), y: rand(0.18, 0.45),
+      vx: rand(0.00018, 0.00032) * (Math.random() > 0.5 ? 1 : -1),
+      vy: rand(-0.00004, 0.00004),
+      size: 110,
+      phase: rand(0, Math.PI * 2),
+      tailPhase: rand(0, Math.PI * 2),
+      alpha: 0.72,
+    };
+
+    // Seaweed stalks at bottom
+    const weeds = Array.from({ length: Math.floor(16 * intensity) }, () => ({
+      x: rand(0, 1),
+      height: rand(0.06, 0.18),
+      segments: randInt(5, 9),
+      phase: rand(0, Math.PI * 2),
+      speed: rand(0.008, 0.02),
+      width: rand(1.5, 4),
+      hue: rand(150, 190),
+      alpha: rand(0.2, 0.5),
+    }));
+
+    // Light rays from top
+    const rays = Array.from({ length: 7 }, () => ({
+      x: rand(0.05, 0.95),
+      width: rand(0.02, 0.08),
+      alpha: rand(0.03, 0.08),
+      speed: rand(0.003, 0.008),
+      phase: rand(0, Math.PI * 2),
+    }));
+
+    // Plankton/particles
+    const plankton = Array.from({ length: Math.floor(80 * intensity) }, () => ({
+      x: rand(0, 1), y: rand(0, 1),
+      r: rand(0.5, 2),
+      vx: rand(-0.0001, 0.0001),
+      vy: rand(-0.0002, 0.0002),
+      alpha: rand(0.05, 0.3),
+      phase: rand(0, Math.PI * 2),
+      pulseSpeed: rand(0.02, 0.06),
+    }));
+
+    const resize = () => { W = c.width = c.offsetWidth; H = c.height = c.offsetHeight; };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(c);
+
+    // ── Draw helpers ─────────────────────────────────────────
+    const drawFish = (f) => {
+      const x = f.x * W, y = f.y * H;
+      const dir = f.vx >= 0 ? 1 : -1;
+      const s = f.size;
+      const tail = Math.sin(f.tailPhase) * s * 0.42;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(dir, 1);
+      ctx.globalAlpha = f.alpha;
+      // Body with gradient
+      ctx.beginPath();
+      ctx.ellipse(0, 0, s, s * 0.40, 0, 0, Math.PI * 2);
+      const fg = ctx.createRadialGradient(-s * 0.1, -s * 0.15, 0, 0, 0, s);
+      fg.addColorStop(0, f.color + '0.85)');
+      fg.addColorStop(0.6, f.color + '0.6)');
+      fg.addColorStop(1, f.color + '0.2)');
+      ctx.fillStyle = fg;
+      ctx.fill();
+      // Belly shine
+      ctx.beginPath();
+      ctx.ellipse(s * 0.05, s * 0.1, s * 0.4, s * 0.18, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      ctx.fill();
+      // Dorsal fin
+      ctx.beginPath();
+      ctx.moveTo(-s * 0.1, -s * 0.38);
+      ctx.bezierCurveTo(s * 0.05, -s * 0.65, s * 0.25, -s * 0.58, s * 0.3, -s * 0.38);
+      ctx.closePath();
+      ctx.fillStyle = f.color + '0.5)';
+      ctx.fill();
+      // Tail
+      ctx.beginPath();
+      ctx.moveTo(-s * 0.72, 0);
+      ctx.lineTo(-s * 1.32, -s * 0.38 + tail);
+      ctx.lineTo(-s * 1.18, 0);
+      ctx.lineTo(-s * 1.32, s * 0.38 + tail);
+      ctx.closePath();
+      ctx.fillStyle = f.color + '0.45)';
+      ctx.fill();
+      // Eye white
+      ctx.beginPath();
+      ctx.arc(s * 0.52, -s * 0.08, s * 0.11, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.fill();
+      // Pupil
+      ctx.beginPath();
+      ctx.arc(s * 0.54, -s * 0.08, s * 0.055, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(10,15,35,1)';
+      ctx.fill();
+      ctx.restore();
+    };
+
+    const drawJelly = (j) => {
+      const x = j.x * W, y = j.y * H;
+      const pulse = 0.82 + 0.18 * Math.sin(j.phase);
+      const s = j.size * pulse;
+      ctx.save();
+
+      // Outer glow
+      ctx.save();
+      ctx.globalAlpha = j.alpha * 0.22;
+      const glow = ctx.createRadialGradient(x, y, s * 0.2, x, y, s * (j.glowRadius || 2.0));
+      glow.addColorStop(0, `hsla(${j.hue},100%,75%,1)`);
+      glow.addColorStop(1, `hsla(${j.hue},100%,60%,0)`);
+      ctx.beginPath();
+      ctx.arc(x, y, s * (j.glowRadius || 2.0), 0, Math.PI * 2);
+      ctx.fillStyle = glow;
+      ctx.fill();
+      ctx.restore();
+
+      ctx.globalAlpha = j.alpha;
+
+      // Bell outer
+      ctx.beginPath();
+      ctx.arc(x, y, s, Math.PI, 0);
+      ctx.closePath();
+      const g = ctx.createRadialGradient(x, y - s * 0.35, s * 0.08, x, y, s);
+      g.addColorStop(0,   `hsla(${j.hue},100%,90%,0.95)`);
+      g.addColorStop(0.4, `hsla(${j.hue},90%,70%,0.55)`);
+      g.addColorStop(1,   `hsla(${j.hue},80%,55%,0.0)`);
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      // Bell rim highlight
+      ctx.beginPath();
+      ctx.arc(x, y, s, Math.PI, 0);
+      ctx.strokeStyle = `hsla(${j.hue},100%,90%,0.55)`;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      // Inner bell structure (ribs)
+      ctx.globalAlpha = j.alpha * 0.45;
+      for (let r = 0; r < 4; r++) {
+        const angle = Math.PI + (r / 3) * Math.PI;
+        const rx = x + Math.cos(angle) * s * 0.75;
+        const ry = y + Math.sin(angle) * s * 0.35;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(rx, ry);
+        ctx.strokeStyle = `hsla(${j.hue},100%,85%,0.6)`;
+        ctx.lineWidth = 0.7;
+        ctx.stroke();
+      }
+
+      // Tentacles
+      ctx.globalAlpha = j.alpha * 0.85;
+      const tentCount = 10;
+      for (let i = 0; i < tentCount; i++) {
+        const tx = x + (i / (tentCount - 1) - 0.5) * s * 1.8;
+        const tentLen = s * (1.4 + 0.4 * Math.sin(j.phase + i * 0.7));
+        ctx.beginPath();
+        ctx.moveTo(tx, y);
+        for (let seg = 0; seg < 8; seg++) {
+          const sy = y + (seg / 7) * tentLen;
+          const sx = tx + Math.sin(j.phase * 1.8 + seg * 0.9 + i * 0.5) * s * 0.18;
+          ctx.lineTo(sx, sy);
+        }
+        const tAlpha = 0.6 - (i % 2) * 0.15;
+        ctx.strokeStyle = `hsla(${j.hue},90%,80%,${tAlpha})`;
+        ctx.lineWidth = i % 3 === 0 ? 1.2 : 0.7;
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    };
+
+    const drawSeaweed = (w) => {
+      const bx = w.x * W;
+      const by = H;
+      const segH = (w.height * H) / w.segments;
+      ctx.save();
+      ctx.globalAlpha = w.alpha;
+      ctx.strokeStyle = `hsla(${w.hue},70%,55%,1)`;
+      ctx.lineWidth = w.width;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(bx, by);
+      for (let i = 0; i < w.segments; i++) {
+        const sway = Math.sin(w.phase + t * w.speed + i * 0.7) * (12 + i * 3);
+        const cx1 = bx + sway + Math.sin(i) * 5;
+        const cy1 = by - (i + 0.5) * segH;
+        const cx2 = bx + sway;
+        const cy2 = by - (i + 1) * segH;
+        ctx.bezierCurveTo(cx1, cy1, cx2, cy1, bx + Math.sin(w.phase + t * w.speed + (i + 1) * 0.7) * (12 + (i + 1) * 3), cy2);
+      }
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    const drawRay = (r) => {
+      const x = r.x * W;
+      const alpha = r.alpha * (0.7 + 0.3 * Math.sin(r.phase + t * r.speed));
+      const w = r.width * W;
+      const g = ctx.createLinearGradient(x, 0, x + w * 0.5, H * 0.7);
+      g.addColorStop(0, `rgba(0,229,255,${alpha})`);
+      g.addColorStop(1, 'rgba(0,229,255,0)');
+      ctx.save();
+      ctx.globalAlpha = 1;
+      ctx.beginPath();
+      ctx.moveTo(x - w * 0.5, 0);
+      ctx.lineTo(x + w * 0.5, 0);
+      ctx.lineTo(x + w, H * 0.7);
+      ctx.lineTo(x - w * 0.2, H * 0.7);
+      ctx.closePath();
+      ctx.fillStyle = g;
+      ctx.fill();
+      ctx.restore();
+    };
+
+    // ── Coral reef draw ────────────────────────────────────────
+    const drawCoral = (cl) => {
+      const bx = cl.x * W;
+      const by = H * 0.998;
+      const sc = cl.scale;
+      const globalSway = Math.sin(cl.phase + t * 0.006) * 2.5;
+      ctx.save();
+      ctx.translate(bx, by);
+
+      /* ── Recursive branching coral ── */
+      const drawBranch = (x, y, angle, len, width, depth, h1, h2, swayMult) => {
+        if (depth === 0 || len < 1.5) return;
+        const localSway = globalSway * swayMult;
+        const cpx = x + Math.cos(angle + 0.18) * len * 0.5 + localSway * 0.5;
+        const cpy = y - Math.sin(angle + 0.18) * len * 0.5;
+        const ex = x + Math.cos(angle) * len + localSway * 0.8;
+        const ey = y - Math.sin(angle) * len;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.quadraticCurveTo(cpx, cpy, ex, ey);
+        const cg = ctx.createLinearGradient(x, y, ex, ey);
+        cg.addColorStop(0, `hsla(${h1},72%,32%,1)`);
+        cg.addColorStop(0.5, `hsla(${h1 + 8},78%,45%,0.95)`);
+        cg.addColorStop(1, `hsla(${h2},88%,60%,0.9)`);
+        ctx.strokeStyle = cg;
+        ctx.lineWidth = width;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        if (depth === 1) {
+          // Polyp bulb tip
+          ctx.beginPath();
+          ctx.arc(ex, ey, width * 2.2, 0, Math.PI * 2);
+          const pg = ctx.createRadialGradient(ex - width * 0.4, ey - width * 0.4, 0, ex, ey, width * 2.2);
+          pg.addColorStop(0, `hsla(${h2 + 15},100%,88%,1)`);
+          pg.addColorStop(0.5, `hsla(${h2},95%,68%,0.9)`);
+          pg.addColorStop(1, `hsla(${h2},80%,50%,0.4)`);
+          ctx.fillStyle = pg;
+          ctx.fill();
+          // Bioluminescent glow halo
+          ctx.save();
+          ctx.globalAlpha = 0.18;
+          const halo = ctx.createRadialGradient(ex, ey, 0, ex, ey, width * 7);
+          halo.addColorStop(0, `hsla(${h2},100%,85%,1)`);
+          halo.addColorStop(1, `hsla(${h2},100%,60%,0)`);
+          ctx.beginPath(); ctx.arc(ex, ey, width * 7, 0, Math.PI * 2);
+          ctx.fillStyle = halo; ctx.fill();
+          ctx.restore();
+        } else {
+          // Texture bump at branch node
+          ctx.beginPath();
+          ctx.arc(ex, ey, width * 1.1, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${h1},70%,38%,0.7)`;
+          ctx.fill();
+          const spreadAngle = 0.38 + (4 - depth) * 0.06;
+          drawBranch(ex, ey, angle - spreadAngle, len * 0.68, width * 0.62, depth - 1, h1, h2, swayMult * 1.2);
+          drawBranch(ex, ey, angle + spreadAngle, len * 0.68, width * 0.62, depth - 1, h1, h2, swayMult * 1.2);
+          if (depth >= 3) drawBranch(ex, ey, angle, len * 0.72, width * 0.55, depth - 1, h1, h2, swayMult * 1.1);
+        }
+      };
+
+      /* ── Staghorn / Acropora ── */
+      const drawStaghorn = (ox, oy, h1, h2, sc2) => {
+        const stems = 5 + Math.floor(sc2 * 2);
+        for (let i = 0; i < stems; i++) {
+          const baseAngle = Math.PI / 2 + (i / (stems - 1) - 0.5) * 1.1;
+          const sLen = (32 + i % 3 * 8) * sc2;
+          drawBranch(ox, oy, baseAngle, sLen, 2.6 * sc2, 4, h1, h2, 0.8 + i * 0.1);
+        }
+      };
+
+      /* ── Sea fan / Gorgonian ── */
+      const drawSeaFan = (ox, oy, h1, h2, fanSc) => {
+        const fanR = 36 * fanSc;
+        const fanSway = globalSway * 0.6;
+        ctx.save();
+        ctx.translate(ox + fanSway, oy);
+        // Stalk
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -8 * fanSc);
+        ctx.strokeStyle = `hsla(${h1},65%,35%,0.9)`; ctx.lineWidth = 2.5 * fanSc; ctx.stroke();
+        // Fan mesh — spines
+        const spines = 14;
+        for (let i = 0; i < spines; i++) {
+          const ang = (i / (spines - 1)) * Math.PI;
+          const fx = Math.cos(ang) * fanR;
+          const fy = -8 * fanSc - Math.sin(ang) * fanR;
+          ctx.beginPath(); ctx.moveTo(0, -8 * fanSc);
+          ctx.quadraticCurveTo(fx * 0.5 + Math.sin(cl.phase + i) * 3, fy * 0.5, fx, fy);
+          ctx.strokeStyle = `hsla(${h1},72%,48%,0.75)`; ctx.lineWidth = 0.9; ctx.stroke();
+        }
+        // Concentric arcs
+        for (let ring = 1; ring <= 4; ring++) {
+          ctx.beginPath();
+          ctx.arc(0, -8 * fanSc, fanR * ring / 4, Math.PI, 0);
+          ctx.strokeStyle = `hsla(${h2},78%,55%,${0.55 - ring * 0.08})`; ctx.lineWidth = 0.7; ctx.stroke();
+        }
+        ctx.restore();
+      };
+
+      /* ── Brain / Favites mound coral ── */
+      const drawBrainCoral = (ox, oy, h1, sc2) => {
+        const mr = 22 * sc2;
+        ctx.save(); ctx.translate(ox, oy);
+        // Dome base with shadow
+        ctx.beginPath(); ctx.arc(0, 0, mr * 1.05, Math.PI, 0);
+        ctx.fillStyle = `hsla(${h1 - 10},50%,18%,0.5)`; ctx.fill();
+        // Dome body
+        ctx.beginPath(); ctx.arc(0, 0, mr, Math.PI, 0);
+        const dg = ctx.createRadialGradient(-mr * 0.25, -mr * 0.5, mr * 0.05, 0, -mr * 0.2, mr * 1.1);
+        dg.addColorStop(0, `hsla(${h1},62%,58%,0.95)`);
+        dg.addColorStop(0.55, `hsla(${h1},55%,38%,0.9)`);
+        dg.addColorStop(1, `hsla(${h1 - 5},48%,22%,0.85)`);
+        ctx.fillStyle = dg; ctx.fill();
+        // Brain-like grooves (meandering ridges)
+        ctx.save(); ctx.globalAlpha = 0.65;
+        for (let gi = 0; gi < 6; gi++) {
+          ctx.beginPath();
+          const gx0 = -mr * 0.75 + gi * mr * 0.3;
+          ctx.moveTo(gx0, 0);
+          for (let seg = 0; seg <= 8; seg++) {
+            const gx = gx0 + Math.sin(seg * 0.8 + gi) * mr * 0.1;
+            const gy = -mr * (seg / 8) * 0.95;
+            const clampX = Math.max(-mr + 2, Math.min(mr - 2, gx));
+            const dist = Math.sqrt(clampX * clampX + gy * gy);
+            if (dist < mr - 1) ctx.lineTo(clampX, gy);
+          }
+          ctx.strokeStyle = `hsla(${h1 + 5},75%,70%,0.7)`; ctx.lineWidth = 1.1; ctx.stroke();
+        }
+        ctx.restore();
+        // Specular highlight
+        ctx.save(); ctx.globalAlpha = 0.2;
+        ctx.beginPath(); ctx.ellipse(-mr * 0.22, -mr * 0.55, mr * 0.28, mr * 0.18, -0.4, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fill(); ctx.restore();
+        ctx.restore();
+      };
+
+      /* ── Tube/pipe sponge ── */
+      const drawTubeSponge = (ox, oy, h1, h2, sc2) => {
+        const tubes = 3 + Math.floor(sc2 * 2);
+        for (let i = 0; i < tubes; i++) {
+          const tx = ox + (i - tubes / 2) * 9 * sc2 + Math.sin(i * 1.3) * 4;
+          const tH = (30 + i % 3 * 12) * sc2;
+          const tr = (4 + i % 2 * 2) * sc2;
+          const tubeSway = globalSway * 0.4;
+          // Tube body
+          ctx.beginPath();
+          ctx.moveTo(tx - tr, oy);
+          ctx.bezierCurveTo(tx - tr + tubeSway * 0.3, oy - tH * 0.5, tx - tr + tubeSway, oy - tH, tx + tubeSway, oy - tH);
+          ctx.bezierCurveTo(tx + tr + tubeSway, oy - tH, tx + tr + tubeSway * 0.3, oy - tH * 0.5, tx + tr, oy);
+          ctx.closePath();
+          const tg = ctx.createLinearGradient(tx - tr, oy, tx + tr, oy - tH);
+          tg.addColorStop(0, `hsla(${h1},60%,28%,0.9)`);
+          tg.addColorStop(1, `hsla(${h2},75%,52%,0.8)`);
+          ctx.fillStyle = tg; ctx.fill();
+          ctx.strokeStyle = `hsla(${h2},80%,55%,0.6)`; ctx.lineWidth = 0.8; ctx.stroke();
+          // Tube rim opening
+          ctx.beginPath();
+          ctx.ellipse(tx + tubeSway, oy - tH, tr * 1.05, tr * 0.5, 0, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${h1 - 10},55%,18%,0.9)`; ctx.fill();
+          ctx.strokeStyle = `hsla(${h2},85%,65%,0.8)`; ctx.lineWidth = 0.9; ctx.stroke();
+        }
+      };
+
+      /* ── Rocky base for each cluster ── */
+      const drawRockyBase = (sc2) => {
+        const bw = 75 * sc2;
+        ctx.save();
+        ctx.globalAlpha = 0.65;
+        // Base rock shadow
+        ctx.beginPath();
+        ctx.ellipse(0, 2, bw * 0.7, 7, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,20,40,0.4)'; ctx.fill();
+        // Main rock mound
+        ctx.beginPath();
+        ctx.moveTo(-bw * 0.55, 0);
+        ctx.bezierCurveTo(-bw * 0.5, -12 * sc2, -bw * 0.3, -15 * sc2, 0, -13 * sc2);
+        ctx.bezierCurveTo(bw * 0.3, -15 * sc2, bw * 0.5, -11 * sc2, bw * 0.55, 0);
+        ctx.closePath();
+        const rg = ctx.createLinearGradient(-bw * 0.5, -14 * sc2, bw * 0.5, 0);
+        rg.addColorStop(0, 'rgba(40,65,90,0.85)');
+        rg.addColorStop(0.5, 'rgba(25,45,65,0.9)');
+        rg.addColorStop(1, 'rgba(10,25,45,0.95)');
+        ctx.fillStyle = rg; ctx.fill();
+        ctx.strokeStyle = 'rgba(60,100,130,0.4)'; ctx.lineWidth = 0.7; ctx.stroke();
+        // Rock texture dots
+        for (let ri = 0; ri < 8; ri++) {
+          ctx.beginPath();
+          ctx.arc((ri - 3.5) * 9 * sc2, -4 * sc2 - Math.abs(ri - 3.5) * 1.5, 1.2, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(70,110,145,0.4)'; ctx.fill();
+        }
+        ctx.restore();
+      };
+
+      // Draw the full cluster based on type
+      drawRockyBase(sc);
+      if (cl.type === 0) {
+        drawStaghorn(-20 * sc, 0, cl.hue1, cl.hue2, sc);
+        drawBrainCoral(28 * sc, -2 * sc, cl.hue2, sc * 0.8);
+        drawTubeSponge(-45 * sc, 0, cl.hue1 + 15, cl.hue2 + 15, sc * 0.7);
+      } else if (cl.type === 1) {
+        drawSeaFan(-8 * sc, -5 * sc, cl.hue1, cl.hue2, sc);
+        drawStaghorn(30 * sc, 0, cl.hue2, cl.hue1, sc * 0.9);
+        drawBrainCoral(-38 * sc, -2 * sc, cl.hue1 + 10, sc * 0.75);
+      } else {
+        drawStaghorn(0, 0, cl.hue1, cl.hue2, sc);
+        drawSeaFan(-36 * sc, -5 * sc, cl.hue2, cl.hue1, sc * 0.85);
+        drawTubeSponge(38 * sc, 0, cl.hue2 + 20, cl.hue1 + 10, sc * 0.8);
+      }
+      ctx.restore();
+    };
+
+    // ── AUV draw (torpedo-style, heading-aware) ─────────────
+    const drawAUV = (av) => {
+      const x = av.x * W, y = av.y * H;
+
+      // Draw thruster bubbles in world space before transform
+      av.thrusterBubbles.forEach(b => {
+        b.wx += b.dvx; b.wy += b.dvy; b.phase += 0.1; b.alpha -= 0.016; b.r += 0.09;
+        const bAlpha = Math.max(0, b.alpha);
+        if (bAlpha <= 0) return;
+        ctx.save(); ctx.globalAlpha = bAlpha;
+        ctx.beginPath(); ctx.arc(b.wx, b.wy, b.r, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0,229,255,0.8)'; ctx.lineWidth = 0.7; ctx.stroke();
+        ctx.beginPath(); ctx.arc(b.wx - b.r * 0.3, b.wy - b.r * 0.3, b.r * 0.3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fill();
+        ctx.restore();
+      });
+      av.thrusterBubbles = av.thrusterBubbles.filter(b => b.alpha > 0);
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(av.angle);
+
+      const L = 58, R = 10; // body half-length, half-height
+      const isInspecting = (av.state === 'hover' || av.state === 'pan' || av.state === 'slowdown');
+
+      // Emit bubbles from rear thruster in world coords
+      if (Math.random() < 0.28) {
+        const rearX = x + Math.cos(av.angle + Math.PI) * L;
+        const rearY = y + Math.sin(av.angle + Math.PI) * L;
+        av.thrusterBubbles.push({
+          wx: rearX, wy: rearY,
+          dvx: Math.cos(av.angle + Math.PI) * rand(0.5, 1.2) + rand(-0.2, 0.2),
+          dvy: rand(-0.5, -0.1),
+          r: rand(1.2, 3), alpha: rand(0.5, 0.75), phase: rand(0, Math.PI * 2)
+        });
+      }
+
+      // ── Body hull (torpedo shaped) ──
+      ctx.beginPath();
+      // Nose (tapered front)
+      ctx.moveTo(L * 0.5, 0);
+      ctx.bezierCurveTo(L * 0.6, -R * 0.3, L * 0.62, R * 0.3, L * 0.5, 0);
+      // Top line
+      ctx.moveTo(-L * 0.42, -R);
+      ctx.lineTo(L * 0.32, -R);
+      ctx.bezierCurveTo(L * 0.48, -R, L * 0.62, -R * 0.5, L * 0.65, 0);
+      ctx.bezierCurveTo(L * 0.62, R * 0.5, L * 0.48, R, L * 0.32, R);
+      ctx.lineTo(-L * 0.42, R);
+      ctx.bezierCurveTo(-L * 0.55, R * 0.7, -L * 0.58, R * 0.3, -L * 0.58, 0);
+      ctx.bezierCurveTo(-L * 0.58, -R * 0.3, -L * 0.55, -R * 0.7, -L * 0.42, -R);
+      ctx.closePath();
+      const hullG = ctx.createLinearGradient(0, -R, 0, R);
+      hullG.addColorStop(0,   'rgba(15,50,90,0.98)');
+      hullG.addColorStop(0.25,'rgba(0,100,160,0.95)');
+      hullG.addColorStop(0.55,'rgba(0,70,130,0.95)');
+      hullG.addColorStop(1,   'rgba(5,30,65,0.98)');
+      ctx.fillStyle = hullG; ctx.fill();
+      // Hull edge glow
+      ctx.strokeStyle = 'rgba(0,200,255,0.45)'; ctx.lineWidth = 1.0; ctx.stroke();
+
+      // ── Hull panel lines & rivets ──
+      ctx.save(); ctx.globalAlpha = 0.22;
+      ctx.strokeStyle = 'rgba(0,229,255,1)'; ctx.lineWidth = 0.6;
+      for (let pl = -1; pl <= 1; pl += 2) {
+        ctx.beginPath(); ctx.moveTo(-L * 0.35, pl * R * 0.52); ctx.lineTo(L * 0.25, pl * R * 0.52); ctx.stroke();
+      }
+      ctx.beginPath(); ctx.moveTo(-L * 0.1, -R * 0.9); ctx.lineTo(-L * 0.1, R * 0.9); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(L * 0.1, -R * 0.85); ctx.lineTo(L * 0.1, R * 0.85); ctx.stroke();
+      for (let rv of [-L * 0.25, -L * 0.05, L * 0.15]) {
+        for (let ry of [-R * 0.55, R * 0.55]) {
+          ctx.beginPath(); ctx.arc(rv, ry, 1.2, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0,229,255,0.5)'; ctx.fill();
+        }
+      }
+      ctx.restore();
+
+      // ── Dorsal fin ──
+      ctx.beginPath();
+      ctx.moveTo(-L * 0.12, -R);
+      ctx.bezierCurveTo(-L * 0.08, -R - 14, L * 0.06, -R - 12, L * 0.1, -R);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(0,80,140,0.88)';
+      ctx.strokeStyle = 'rgba(0,180,230,0.4)'; ctx.lineWidth = 0.8;
+      ctx.fill(); ctx.stroke();
+
+      // ── Side stabilizer fins ──
+      [[-L * 0.35, -1], [-L * 0.35, 1]].forEach(([fx, side]) => {
+        ctx.beginPath();
+        ctx.moveTo(fx, side * R);
+        ctx.bezierCurveTo(fx + 10, side * (R + 8), fx + 20, side * (R + 6), fx + 18, side * R);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(0,90,150,0.85)';
+        ctx.strokeStyle = 'rgba(0,180,230,0.35)'; ctx.lineWidth = 0.7;
+        ctx.fill(); ctx.stroke();
+      });
+
+      // ── Main thruster housing (rear) ──
+      const thrX = -L * 0.58;
+      ctx.beginPath(); ctx.ellipse(thrX, 0, R * 0.55, R * 0.8, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0,200,240,0.6)'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.fillStyle = 'rgba(5,25,55,0.85)'; ctx.fill();
+      // Spinning propeller blades
+      ctx.save(); ctx.translate(thrX, 0); ctx.rotate(av.thrusterPhase);
+      for (let b2 = 0; b2 < 5; b2++) {
+        ctx.save(); ctx.rotate(b2 * Math.PI * 2 / 5);
+        ctx.beginPath();
+        ctx.ellipse(0, R * 0.42, 2.2, 5.5, 0.25, 0, Math.PI * 2);
+        const bladeG = ctx.createLinearGradient(0, 0, 0, R * 0.75);
+        bladeG.addColorStop(0, 'rgba(0,220,255,0.85)');
+        bladeG.addColorStop(1, 'rgba(0,140,200,0.5)');
+        ctx.fillStyle = bladeG; ctx.fill();
+        ctx.restore();
+      }
+      // Hub
+      ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,180,230,0.9)'; ctx.fill();
+      ctx.restore();
+
+      // ── Vertical thrusters (top & bottom) ──
+      [[-R - 6, -R], [-R - 6, R]].forEach(([ty, ry]) => {
+        const tvx = -L * 0.08;
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(tvx - 4, ry > 0 ? R : ty, 8, 6, 2) : ctx.rect(tvx - 4, ry > 0 ? R : ty, 8, 6);
+        ctx.fillStyle = 'rgba(0,100,175,0.85)'; ctx.fill();
+        ctx.strokeStyle = 'rgba(0,200,240,0.45)'; ctx.lineWidth = 0.7; ctx.stroke();
+        // mini prop
+        ctx.save(); ctx.translate(tvx, ry > 0 ? R + 3 : -R - 3); ctx.rotate(av.thrusterPhase * 1.4);
+        for (let bp = 0; bp < 3; bp++) {
+          ctx.save(); ctx.rotate(bp * Math.PI * 2 / 3);
+          ctx.beginPath(); ctx.ellipse(0, 3, 1.2, 3.2, 0.2, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0,200,240,0.7)'; ctx.fill();
+          ctx.restore();
+        }
+        ctx.restore();
+      });
+
+      // ── Front camera dome ──
+      const camX = L * 0.38;
+      ctx.beginPath(); ctx.arc(camX, 0, R * 0.72, 0, Math.PI * 2);
+      const domeG = ctx.createRadialGradient(camX - R * 0.2, -R * 0.22, 0.5, camX, 0, R * 0.72);
+      domeG.addColorStop(0, 'rgba(220,250,255,0.95)');
+      domeG.addColorStop(0.3, 'rgba(80,210,255,0.7)');
+      domeG.addColorStop(0.75, 'rgba(0,100,180,0.6)');
+      domeG.addColorStop(1, 'rgba(0,40,100,0.9)');
+      ctx.fillStyle = domeG; ctx.fill();
+      ctx.strokeStyle = 'rgba(0,220,255,0.75)'; ctx.lineWidth = 1.2; ctx.stroke();
+      // Dome cross-hair
+      ctx.save(); ctx.globalAlpha = 0.35;
+      ctx.strokeStyle = 'rgba(0,229,255,1)'; ctx.lineWidth = 0.7;
+      ctx.beginPath(); ctx.moveTo(camX - R * 0.5, 0); ctx.lineTo(camX + R * 0.5, 0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(camX, -R * 0.5); ctx.lineTo(camX, R * 0.5); ctx.stroke();
+      ctx.beginPath(); ctx.arc(camX, 0, R * 0.35, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+
+      // ── Side sensor pods ──
+      [[-L * 0.18, -R - 3], [-L * 0.18, R + 3]].forEach(([sx, sy]) => {
+        ctx.beginPath(); ctx.ellipse(sx, sy, 6, 3.5, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,80,130,0.9)'; ctx.fill();
+        ctx.strokeStyle = 'rgba(0,200,230,0.5)'; ctx.lineWidth = 0.8; ctx.stroke();
+      });
+
+      // ── LED status lights ──
+      av.lightFlicker = 0.85 + 0.15 * Math.sin(t * 0.12);
+      const leds = [
+        { x: -L * 0.25, y: -R + 1.5, c: `rgba(0,229,255,${0.9 * av.lightFlicker})`, g: 'rgba(0,229,255,' },
+        { x: 0,         y: -R + 1.5, c: isInspecting ? `rgba(0,255,120,${0.95 * av.lightFlicker})` : `rgba(0,229,255,${0.9 * av.lightFlicker})`, g: isInspecting ? 'rgba(0,255,120,' : 'rgba(0,229,255,' },
+        { x: L * 0.2,   y: -R + 1.5, c: `rgba(0,229,255,${0.9 * av.lightFlicker})`, g: 'rgba(0,229,255,' },
+      ];
+      leds.forEach(led => {
+        ctx.beginPath(); ctx.arc(led.x, led.y, 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = led.c; ctx.fill();
+        ctx.save(); ctx.globalAlpha = 0.28;
+        ctx.beginPath(); ctx.arc(led.x, led.y, 7, 0, Math.PI * 2);
+        const lg = ctx.createRadialGradient(led.x, led.y, 0, led.x, led.y, 7);
+        lg.addColorStop(0, led.g + '1)'); lg.addColorStop(1, led.g + '0)');
+        ctx.fillStyle = lg; ctx.fill(); ctx.restore();
+      });
+
+      // ── Inspection scan beam (wide fan angled down toward coral) ──
+      if (isInspecting && av.scanBeamAlpha > 0.05) {
+        ctx.save();
+        const beamLen  = 90 + Math.sin(av.scanPhase * 1.1) * 12;
+        const beamHW   = 22 + Math.sin(av.scanPhase * 0.75) * 6; // half-width at tip
+        // Beam fans from nose downward-forward (~20° below horizontal)
+        const bAngle   = 0.34; // radians below horizontal
+        const tipX     = L * 0.65 + Math.cos(bAngle) * beamLen;
+        const tipY     = Math.sin(bAngle) * beamLen;
+        ctx.globalAlpha = av.scanBeamAlpha * 0.5;
+        const bg2 = ctx.createLinearGradient(L * 0.65, 0, tipX, tipY);
+        bg2.addColorStop(0,   'rgba(0,229,255,0.95)');
+        bg2.addColorStop(0.35,'rgba(120,240,255,0.55)');
+        bg2.addColorStop(1,   'rgba(0,200,255,0.0)');
+        ctx.beginPath();
+        ctx.moveTo(L * 0.65, -3);
+        ctx.lineTo(tipX - beamHW * 0.4, tipY - beamHW);
+        ctx.lineTo(tipX + beamHW * 0.4, tipY + beamHW * 0.3);
+        ctx.lineTo(L * 0.65, 3);
+        ctx.closePath();
+        ctx.fillStyle = bg2;
+        ctx.fill();
+        ctx.restore();
+
+        // Sweeping scan line inside beam
+        ctx.save();
+        ctx.globalAlpha = av.scanBeamAlpha * 0.8;
+        const sweep = Math.sin(av.scanPhase * 2.2) * beamHW * 0.7;
+        ctx.beginPath();
+        ctx.moveTo(L * 0.65, sweep * 0.1);
+        ctx.lineTo(tipX - sweep * 0.2, tipY + sweep);
+        ctx.strokeStyle = 'rgba(0,255,160,0.95)';
+        ctx.lineWidth = 1.3;
+        ctx.stroke();
+        ctx.restore();
+
+        // Scanning data-point dots on beam
+        ctx.save(); ctx.globalAlpha = av.scanBeamAlpha * 0.65;
+        for (let dd = 0; dd < 4; dd++) {
+          const ft = 0.45 + dd * 0.14;
+          const dotX = L * 0.65 + (tipX - L * 0.65) * ft;
+          const dotY = tipY * ft + Math.sin(av.scanPhase * 1.8 + dd * 1.4) * 5;
+          ctx.beginPath(); ctx.arc(dotX, dotY, 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0,255,180,0.95)'; ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // ── "SRM AUV" label — large and clearly readable ──
+      ctx.save();
+      ctx.globalAlpha = 0.95;
+      // Bright background plaque
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(-L * 0.18, -5.5, L * 0.36, 11, 2) : ctx.rect(-L * 0.18, -5.5, L * 0.36, 11);
+      ctx.fillStyle = 'rgba(0,30,60,0.7)'; ctx.fill();
+      ctx.strokeStyle = 'rgba(0,200,255,0.4)'; ctx.lineWidth = 0.6; ctx.stroke();
+      ctx.font = 'bold 9.5px "Orbitron", "JetBrains Mono", monospace';
+      ctx.fillStyle = 'rgba(0,240,255,1)';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,229,255,0.9)';
+      ctx.shadowBlur = 6;
+      ctx.fillText('SRM AUV', 0, 0);
+      ctx.shadowBlur = 0;
+      ctx.restore();
+
+      ctx.restore();
+    };
+
+    const drawWhale = (wh) => {
+      const x = wh.x * W, y = wh.y * H;
+      const s = wh.size;
+      const dir = wh.vx >= 0 ? 1 : -1;
+      const tailSwing = Math.sin(wh.tailPhase) * s * 0.18;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(dir, 1);
+      ctx.globalAlpha = wh.alpha;
+
+      // Body
+      ctx.beginPath();
+      ctx.ellipse(0, 0, s, s * 0.38, 0, 0, Math.PI * 2);
+      const bg = ctx.createLinearGradient(-s, -s * 0.38, -s, s * 0.38);
+      bg.addColorStop(0, 'rgba(100,180,220,0.9)');
+      bg.addColorStop(0.45, 'rgba(40,110,160,0.85)');
+      bg.addColorStop(1, 'rgba(20,60,100,0.8)');
+      ctx.fillStyle = bg;
+      ctx.fill();
+
+      // Belly lighter patch
+      ctx.beginPath();
+      ctx.ellipse(s * 0.1, s * 0.12, s * 0.55, s * 0.18, 0.1, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(200,230,245,0.35)';
+      ctx.fill();
+
+      // Tail flukes
+      ctx.save();
+      ctx.translate(-s * 0.88, tailSwing * 0.5);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-s * 0.18, -s * 0.28 + tailSwing, -s * 0.42, -s * 0.38 + tailSwing, -s * 0.5, -s * 0.22 + tailSwing);
+      ctx.bezierCurveTo(-s * 0.38, -s * 0.05, -s * 0.1, s * 0.05, 0, 0);
+      ctx.fillStyle = 'rgba(30,90,140,0.85)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-s * 0.18, s * 0.28 + tailSwing, -s * 0.42, s * 0.38 + tailSwing, -s * 0.5, s * 0.22 + tailSwing);
+      ctx.bezierCurveTo(-s * 0.38, s * 0.05, -s * 0.1, -s * 0.05, 0, 0);
+      ctx.fillStyle = 'rgba(30,90,140,0.85)';
+      ctx.fill();
+      ctx.restore();
+
+      // Dorsal fin
+      ctx.beginPath();
+      ctx.moveTo(s * 0.05, -s * 0.36);
+      ctx.bezierCurveTo(s * 0.12, -s * 0.72, s * 0.28, -s * 0.65, s * 0.3, -s * 0.36);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(35,95,145,0.9)';
+      ctx.fill();
+
+      // Pectoral fin
+      ctx.beginPath();
+      ctx.moveTo(s * 0.35, s * 0.08);
+      ctx.bezierCurveTo(s * 0.5, s * 0.42, s * 0.22, s * 0.55, s * 0.1, s * 0.36);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(35,95,145,0.88)';
+      ctx.fill();
+
+      // Eye
+      ctx.beginPath();
+      ctx.arc(s * 0.62, -s * 0.06, s * 0.045, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(s * 0.62, -s * 0.06, s * 0.025, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(10,20,40,1)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(s * 0.608, -s * 0.072, s * 0.01, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.fill();
+
+      // Smile line
+      ctx.beginPath();
+      ctx.arc(s * 0.72, s * 0.05, s * 0.12, Math.PI * 0.1, Math.PI * 0.5);
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.restore();
+
+      // Bubble trail from blowhole area
+      if (Math.random() < 0.015) {
+        const bx = x + dir * (s * 0.55);
+        const by = y - s * 0.36;
+        for (let b = 0; b < 2; b++) {
+          bubbles.push({
+            x: bx / W + rand(-0.005, 0.005),
+            y: by / H,
+            r: rand(1.5, 4),
+            vy: rand(0.0006, 0.001),
+            vx: rand(-0.0001, 0.0001),
+            wobble: rand(0, Math.PI * 2),
+            wobbleSpeed: rand(0.02, 0.04),
+            wobbleAmp: rand(0.001, 0.003),
+            alpha: rand(0.3, 0.55),
+          });
+        }
+      }
+    };
+
+    // ── Main render loop ─────────────────────────────────────
+    const draw = () => {
+      t++;
+      ctx.clearRect(0, 0, W, H);
+
+      // ── Depth gradient overlay for realism ──
+      const depthG = ctx.createLinearGradient(0, 0, 0, H);
+      depthG.addColorStop(0, 'rgba(0,40,80,0.22)');
+      depthG.addColorStop(0.5, 'rgba(0,20,50,0.0)');
+      depthG.addColorStop(1, 'rgba(0,5,20,0.35)');
+      ctx.fillStyle = depthG; ctx.fillRect(0, 0, W, H);
+
+      // Light rays (more realistic, variable opacity)
+      rays.forEach(r => {
+        r.phase += r.speed;
+        const x2 = r.x * W;
+        const alpha = r.alpha * (0.55 + 0.45 * Math.sin(r.phase));
+        const w2 = r.width * W;
+        const g2 = ctx.createLinearGradient(x2, 0, x2 + w2 * 0.4, H * 0.75);
+        g2.addColorStop(0, `rgba(120,210,255,${alpha * 0.7})`);
+        g2.addColorStop(0.3, `rgba(0,180,220,${alpha * 0.4})`);
+        g2.addColorStop(1, 'rgba(0,120,180,0)');
+        ctx.save(); ctx.globalAlpha = 1;
+        ctx.beginPath();
+        ctx.moveTo(x2 - w2 * 0.5, 0);
+        ctx.lineTo(x2 + w2 * 0.5, 0);
+        ctx.lineTo(x2 + w2 * 1.1, H * 0.75);
+        ctx.lineTo(x2 - w2 * 0.15, H * 0.75);
+        ctx.closePath(); ctx.fillStyle = g2; ctx.fill(); ctx.restore();
+      });
+
+      // Seaweed at bottom
+      weeds.forEach(w => drawSeaweed(w));
+
+      // Jellyfish
+      jellies.forEach(j => {
+        j.phase += j.pulseSpeed;
+        j.x += j.vx; 
+        j.y += j.vy + Math.sin(j.phase * 0.4) * 0.00018;
+        if (j.x < -0.12) j.x = 1.12;
+        if (j.x > 1.12) j.x = -0.12;
+        j.y = Math.max(0.02, Math.min(0.78, j.y));
+        drawJelly(j);
+      });
+
+      // ── Sandy seafloor ──
+      const floorY = H * 0.97;
+      const floorG = ctx.createLinearGradient(0, floorY - 20, 0, H);
+      floorG.addColorStop(0, 'rgba(10,35,65,0)');
+      floorG.addColorStop(0.3, 'rgba(18,50,80,0.55)');
+      floorG.addColorStop(1, 'rgba(8,28,55,0.9)');
+      ctx.beginPath(); ctx.rect(0, floorY - 20, W, H - floorY + 20);
+      ctx.fillStyle = floorG; ctx.fill();
+      // Sand ripples
+      ctx.save(); ctx.globalAlpha = 0.12;
+      ctx.strokeStyle = 'rgba(100,160,200,1)'; ctx.lineWidth = 0.8;
+      for (let ri = 0; ri < 12; ri++) {
+        const ry = floorY + ri * 4;
+        ctx.beginPath();
+        for (let rx = 0; rx < W; rx += 20) {
+          const offset = Math.sin(rx * 0.03 + ri * 0.7 + t * 0.003) * 2;
+          if (rx === 0) ctx.moveTo(rx, ry + offset); else ctx.lineTo(rx, ry + offset);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Coral reefs (drawn before AUV so AUV appears on top)
+      coralClusters.forEach(cl => {
+        cl.phase += 0.007;
+        drawCoral(cl);
+      });
+
+      // AUV inspection spotlight on targeted coral
+      if (auv.scanBeamAlpha > 0.05) {
+        const glowTgt = sortedCorals[auv.targetIdx];
+        const gx = glowTgt.x * W, gy = H * 0.88;
+        const glowR = 65 + Math.sin(auv.scanPhase * 0.9) * 8;
+        ctx.save();
+        ctx.globalAlpha = auv.scanBeamAlpha * 0.28;
+        const coralGlow = ctx.createRadialGradient(gx, gy, 4, gx, gy, glowR);
+        coralGlow.addColorStop(0,   'rgba(0,229,255,0.9)');
+        coralGlow.addColorStop(0.4, 'rgba(0,200,255,0.4)');
+        coralGlow.addColorStop(1,   'rgba(0,150,220,0.0)');
+        ctx.beginPath(); ctx.arc(gx, gy, glowR, 0, Math.PI * 2);
+        ctx.fillStyle = coralGlow; ctx.fill();
+        ctx.restore();
+      }
+
+      // ── AUV state machine ──────────────────────────────────
+      auv.scanPhase += 0.04;
+      auv.bobPhase  += 0.016;
+      auv.thrusterPhase += (auv.state === 'hover' || auv.state === 'pan') ? 0.04 : 0.13;
+
+      const tgt   = sortedCorals[auv.targetIdx];
+      const tgtWX = tgt.x * W;          // coral world-x
+      const tgtWY = H * 0.855;          // coral inspection depth (just above reef)
+
+      // ── CRUISE: fly straight toward next coral at a comfortable approach height ──
+      if (auv.state === 'cruise') {
+        auv.scanBeamAlpha = Math.max(0, auv.scanBeamAlpha - 0.04);
+
+        // Steer toward a waypoint 90px in front of the coral, same y
+        const wpX = tgtWX - 90;   // stop 90px to the left of coral
+        const wpY = tgtWY - 18;   // slightly above reef level
+        const dx  = wpX - auv.x * W;
+        const dy  = wpY - auv.y * H;
+        const desired = Math.atan2(dy, dx);
+        // Smooth angle interpolation — avoid spinning
+        let da = desired - auv.angle;
+        while (da >  Math.PI) da -= Math.PI * 2;
+        while (da < -Math.PI) da += Math.PI * 2;
+        auv.angle += da * 0.025;
+
+        const spd = auv.speed * W;
+        auv.x += (Math.cos(auv.angle) * spd) / W;
+        auv.y += (Math.sin(auv.angle) * spd) / H;
+        // Gentle bob
+        auv.y += Math.sin(auv.bobPhase) * 0.00006;
+
+        const dist = Math.hypot(auv.x * W - wpX, auv.y * H - wpY);
+        if (dist < 28) {
+          auv.state = 'slowdown';
+          auv.timer = 0;
+        }
+        // Wrap around after passing last coral
+        if (auv.x > 1.12) {
+          auv.x = -0.06;
+          auv.y = 0.80;
+          auv.angle = 0;
+          auv.targetIdx = 0;
+        }
+
+      // ── SLOWDOWN: brake and align perpendicular to coral, light fades in ──
+      } else if (auv.state === 'slowdown') {
+        auv.timer++;
+        auv.scanBeamAlpha = Math.min(0.9, auv.timer / 50);
+
+        // Glide to hover point: directly left of coral, facing right
+        const hoverX = tgtWX - 80;
+        const hoverY = tgtWY;
+        const dx2 = hoverX - auv.x * W;
+        const dy2 = hoverY - auv.y * H;
+        auv.x += (dx2 * 0.032) / W;
+        auv.y += (dy2 * 0.032) / H;
+        // Rotate to face coral (angle = 0, pointing right)
+        let da2 = 0 - auv.angle;
+        while (da2 >  Math.PI) da2 -= Math.PI * 2;
+        while (da2 < -Math.PI) da2 += Math.PI * 2;
+        auv.angle += da2 * 0.06;
+
+        if (auv.timer > 80) {
+          auv.state = 'hover';
+          auv.timer = 0;
+        }
+
+      // ── HOVER: stationary, light fully on, held for a beat ──
+      } else if (auv.state === 'hover') {
+        auv.timer++;
+        auv.scanBeamAlpha = 0.92 + 0.08 * Math.sin(auv.scanPhase * 0.8);
+
+        // Micro-drift to feel alive
+        auv.x += Math.sin(auv.bobPhase * 0.7) * 0.000025;
+        auv.y += Math.sin(auv.bobPhase * 1.1) * 0.000018;
+
+        // Keep angle locked at 0 (facing coral)
+        let da3 = 0 - auv.angle;
+        while (da3 >  Math.PI) da3 -= Math.PI * 2;
+        while (da3 < -Math.PI) da3 += Math.PI * 2;
+        auv.angle += da3 * 0.08;
+
+        if (auv.timer > 120) {
+          auv.state = 'pan';
+          auv.timer = 0;
+        }
+
+      // ── PAN: slowly glide forward past the coral, light illuminating it ──
+      } else if (auv.state === 'pan') {
+        auv.timer++;
+        auv.scanBeamAlpha = 0.88 + 0.12 * Math.sin(auv.scanPhase * 0.6);
+
+        // Creep forward very slowly, maintaining depth
+        auv.x += (auv.speed * 0.38 * W) / W;
+        auv.y += (tgtWY - auv.y * H) * 0.008 / H;
+        // Keep level
+        let da4 = 0 - auv.angle;
+        while (da4 >  Math.PI) da4 -= Math.PI * 2;
+        while (da4 < -Math.PI) da4 += Math.PI * 2;
+        auv.angle += da4 * 0.05;
+
+        if (auv.timer > 160) {
+          auv.state = 'depart';
+          auv.timer = 0;
+        }
+
+      // ── DEPART: accelerate away, light fades off, move to next target ──
+      } else if (auv.state === 'depart') {
+        auv.timer++;
+        auv.scanBeamAlpha = Math.max(0, 0.9 - auv.timer / 35);
+
+        // Pick up speed heading right
+        const departSpd = auv.speed * (1 + auv.timer * 0.012);
+        auv.x += (Math.cos(auv.angle) * departSpd * W) / W;
+        auv.y += Math.sin(auv.bobPhase * 0.5) * 0.00007;
+        let da5 = 0 - auv.angle;
+        while (da5 >  Math.PI) da5 -= Math.PI * 2;
+        while (da5 < -Math.PI) da5 += Math.PI * 2;
+        auv.angle += da5 * 0.04;
+
+        if (auv.timer > 55) {
+          auv.targetIdx = (auv.targetIdx + 1) % sortedCorals.length;
+          auv.state = 'cruise';
+          auv.timer = 0;
+          auv.scanBeamAlpha = 0;
+        }
+      }
+
+      // Clamp y
+      auv.y = Math.max(0.65, Math.min(0.92, auv.y));
+      drawAUV(auv);
+
+      // Whale
+      whale.phase += 0.008;
+      whale.tailPhase += 0.045;
+      whale.x += whale.vx;
+      whale.y += whale.vy + Math.sin(whale.phase) * 0.00006;
+      if (whale.x > 1.25) { whale.x = -0.25; }
+      if (whale.x < -0.25) { whale.x = 1.25; }
+      whale.y = Math.max(0.12, Math.min(0.55, whale.y));
+      drawWhale(whale);
+
+      // Plankton
+      plankton.forEach(p => {
+        p.phase += p.pulseSpeed; p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
+        if (p.y < 0) p.y = 1; if (p.y > 1) p.y = 0;
+        const a = p.alpha * (0.5 + 0.5 * Math.sin(p.phase));
+        ctx.beginPath();
+        ctx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,229,255,${a})`;
+        ctx.fill();
+      });
+
+      // Fish
+      fish.forEach(f => {
+        f.tailPhase += f.tailSpeed;
+        f.wobble += 0.02;
+        f.x += f.vx + Math.sin(f.wobble) * 0.00005;
+        f.y += f.vy + Math.sin(f.wobble * 0.5) * 0.00008;
+        if (f.x > 1.4) f.x = -0.3;
+        if (f.x < -0.4) f.x = 1.3;
+        f.y = Math.max(0.05, Math.min(0.92, f.y));
+        drawFish(f);
+      });
+
+      // Bubbles (on top)
+      bubbles.forEach(b => {
+        b.wobble += b.wobbleSpeed; b.y -= b.vy; b.x += b.vx + Math.sin(b.wobble) * b.wobbleAmp;
+        if (b.y < -0.02) { b.y = 1.05; b.x = rand(0, 1); }
+        if (b.x < 0) b.x = 1; if (b.x > 1) b.x = 0;
+        const bx = b.x * W, by = b.y * H;
+        ctx.save();
+        ctx.globalAlpha = b.alpha;
+        // Bubble circle
+        ctx.beginPath();
+        ctx.arc(bx, by, b.r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(0,229,255,0.8)`;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+        // Bubble shine
+        ctx.beginPath();
+        ctx.arc(bx - b.r * 0.3, by - b.r * 0.35, b.r * 0.28, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fill();
+        ctx.restore();
+      });
+
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+  }, [intensity]);
+  return <canvas ref={ref} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />;
+}
+
+/* Simple lightweight bubbles-only for inner pages */
+function Particles({ count = 60 }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const c = ref.current; if (!c) return;
+    const ctx = c.getContext('2d');
+    let raf, w, h;
+    const pts = Array.from({ length: count }, () => ({
+      x: Math.random(), y: Math.random(),
+      r: Math.random() * 1.8 + 0.4,
+      vx: (Math.random() - .5) * .0002,
+      vy: -Math.random() * .0004 - .0001,
+      a: Math.random() * .5 + .05,
+      p: Math.random() * Math.PI * 2,
+    }));
+    const resize = () => { w = c.width = c.offsetWidth; h = c.height = c.offsetHeight; };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(c);
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+      pts.forEach(p => {
+        p.p += .015; p.x += p.vx; p.y += p.vy;
+        if (p.y < -.01) { p.y = 1.01; p.x = Math.random(); }
+        if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
+        const a = p.a * (.6 + .4 * Math.sin(p.p));
+        ctx.beginPath(); ctx.arc(p.x * w, p.y * h, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,229,255,${a})`; ctx.fill();
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+  }, [count]);
+  return <canvas ref={ref} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL REVEAL
+═══════════════════════════════════════════════════════════════ */
+function Reveal({ children, delay = 0, style = {} }) {
+  const ref = useRef(null);
+  const [vis, setVis] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); obs.disconnect(); } }, { threshold: .08 });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+  return (
+    <div ref={ref} style={{ opacity: vis ? 1 : 0, transform: vis ? "none" : "translateY(28px)", transition: `opacity .7s ease ${delay}ms, transform .7s ease ${delay}ms`, ...style }}>
+      {children}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   REUSABLE: Section Label
+═══════════════════════════════════════════════════════════════ */
+const SectionLabel = ({ text }) => (
+  <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: C.accent, letterSpacing: 4, textTransform: "uppercase", marginBottom: 12 }}>
+    <span style={{ opacity: .5 }}>// </span>{text}
+  </p>
+);
+
+const SectionTitle = ({ children }) => (
+  <h2 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(1.7rem,3.5vw,3rem)", fontWeight: 900, color: "#fff", lineHeight: 1.15 }}>
+    {children}
+  </h2>
+);
+
+const Accent = ({ children }) => (
+  <span style={{ background: `linear-gradient(90deg,${C.accent},${C.accent2})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+    {children}
+  </span>
+);
+
+/* ═══════════════════════════════════════════════════════════════
+   REUSABLE: Glassy Card
+═══════════════════════════════════════════════════════════════ */
+function GlassCard({ children, style = {}, hover = true }) {
+  const [h, setH] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => hover && setH(true)}
+      onMouseLeave={() => hover && setH(false)}
+      style={{
+        background: h ? "rgba(0,229,255,0.05)" : "rgba(255,255,255,0.018)",
+        border: `1px solid ${h ? C.borderHover : C.border}`,
+        borderRadius: 16,
+        backdropFilter: "blur(12px)",
+        transition: "all .4s ease",
+        boxShadow: h ? "0 0 40px rgba(0,229,255,0.08), 0 20px 60px rgba(0,0,0,.4)" : "0 4px 24px rgba(0,0,0,.3)",
+        transform: h ? "translateY(-5px)" : "none",
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   REUSABLE: Btn
+═══════════════════════════════════════════════════════════════ */
+function Btn({ children, onClick, primary = false, small = false }) {
+  const [h, setH] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setH(true)}
+      onMouseLeave={() => setH(false)}
+      style={{
+        padding: small ? "9px 20px" : "13px 28px",
+        background: primary ? (h ? `linear-gradient(135deg,${C.accent2},${C.accent})` : `linear-gradient(135deg,${C.accent},${C.accent2})`) : "transparent",
+        color: primary ? C.bg0 : C.accent,
+        border: primary ? "none" : `1px solid ${h ? C.accent : "rgba(0,229,255,0.35)"}`,
+        borderRadius: 6,
+        fontFamily: "'Orbitron',monospace",
+        fontWeight: primary ? 700 : 400,
+        fontSize: small ? 9 : 10,
+        letterSpacing: 2,
+        textTransform: "uppercase",
+        cursor: "pointer",
+        boxShadow: primary ? (h ? "0 0 40px rgba(0,229,255,0.5)" : "0 0 24px rgba(0,229,255,0.3)") : "none",
+        transform: h ? "translateY(-2px)" : "none",
+        transition: "all .3s ease",
+        whiteSpace: "nowrap",
+      }}
+    >{children}</button>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════════════════════ */
+function Navbar({ page, setPage, goBack, canGoBack }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  useEffect(() => {
+    const h = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", h);
+    return () => window.removeEventListener("scroll", h);
+  }, []);
+  const nav = (p) => { setPage(p); setMobileOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const links = [
+    { id: "home", label: "Home" },
+    { id: "about", label: "About" },
+    { id: "team", label: "Team" },
+    { id: "vehicles", label: "Vehicles" },
+    { id: "nemo", label: "NEMO" },
+    { id: "achievements", label: "Achievements" },
+    { id: "competitions", label: "Competitions" },
+    { id: "gallery", label: "Gallery" },
+    { id: "contact", label: "Contact" },
+  ];
+  return (
+    <>
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
+        background: scrolled ? "rgba(2,12,27,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(16px)" : "none",
+        borderBottom: scrolled ? `1px solid ${C.border}` : "none",
+        transition: "all .4s ease",
+      }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 clamp(1rem,3vw,2rem)", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* Logo always left-aligned */}
+          <div onClick={() => nav("home")} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+            <div style={{ width: 42, height: 42, borderRadius: "50%", overflow: "hidden", border: `2px solid rgba(0,229,255,0.4)`, boxShadow: `0 0 16px rgba(0,229,255,0.35)`, flexShrink: 0 }}>
+              <img src={PHOTOS.logo} alt="Team SRM AUV Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+            <div>
+              <div style={{ fontFamily: "'Orbitron',monospace", fontWeight: 800, fontSize: 13, color: C.accent, letterSpacing: 1.5 }}>TEAM SRM AUV</div>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: C.muted, letterSpacing: 2 }}>EST. 2013</div>
+            </div>
+          </div>
+          {/* Desktop Links */}
+          <div className="desktop-nav" style={{ display: "flex", gap: "1.4rem", alignItems: "center" }}>
+            {links.slice(0, 8).map(({ id, label }) => (
+              <button key={id} onClick={() => nav(id)} style={{
+                background: "none", border: "none", cursor: "pointer",
+                fontFamily: "'Orbitron',monospace", fontSize: 9, letterSpacing: 2,
+                color: page === id ? C.accent : C.muted,
+                textTransform: "uppercase", padding: "4px 0",
+                borderBottom: page === id ? `1px solid ${C.accent}` : "1px solid transparent",
+                transition: "all .25s",
+              }}
+                onMouseEnter={e => e.target.style.color = C.accent}
+                onMouseLeave={e => e.target.style.color = page === id ? C.accent : C.muted}
+              >{label}</button>
+            ))}
+            <Btn onClick={() => nav("contact")} small primary>Sponsor Us</Btn>
+          </div>
+          {/* Mobile hamburger */}
+          <button onClick={() => setMobileOpen(!mobileOpen)} style={{ display: "none", background: "none", border: "none", color: C.accent, cursor: "pointer", fontSize: 22 }} className="hamburger">☰</button>
+        </div>
+      </nav>
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 190, background: "rgba(2,12,27,0.98)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 }}>
+          {canGoBack && page !== "home" && (
+            <button onClick={() => { goBack(); setMobileOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(0,229,255,0.1)", border: `1px solid rgba(0,229,255,0.3)`, borderRadius: 8, padding: "10px 24px", cursor: "pointer", color: C.accent, fontFamily: "'JetBrains Mono',monospace", fontSize: 12, letterSpacing: 2, marginBottom: 8 }}>
+              ← Back
+            </button>
+          )}
+          {links.map(({ id, label }) => (
+            <button key={id} onClick={() => nav(id)} style={{ background: "none", border: "none", fontFamily: "'Orbitron',monospace", fontSize: 18, color: page === id ? C.accent : "#fff", cursor: "pointer", letterSpacing: 3 }}>{label}</button>
+          ))}
+        </div>
+      )}
+      <style>{`@media(max-width:900px){.hamburger{display:block!important} nav>div>div:nth-child(2){display:none!important}}`}</style>
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE HERO BANNER (reused across pages)
+═══════════════════════════════════════════════════════════════ */
+function PageHero({ title, subtitle, accent, breadcrumb, onBack, canGoBack }) {
+  return (
+    <div style={{ position: "relative", paddingTop: "clamp(100px,15vw,140px)", paddingBottom: "clamp(48px,8vw,80px)", background: `linear-gradient(180deg,${C.bg0} 0%,${C.bg1} 100%)`, overflow: "hidden", textAlign: "center" }}>
+      <Particles count={35} />
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 80%,rgba(0,119,182,0.1),transparent 70%)" }} />
+      <div style={{ position: "relative", zIndex: 2 }}>
+        {/* Breadcrumb row with back button */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 12 }}>
+          {canGoBack && (
+            <button onClick={onBack} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(0,229,255,0.06)", border: "1px solid rgba(0,229,255,0.2)", borderRadius: 20, padding: "5px 14px", cursor: "pointer", color: C.accent, fontFamily: "'JetBrains Mono',monospace", fontSize: 9, letterSpacing: 1.5, transition: "all .25s" }}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(0,229,255,0.14)";e.currentTarget.style.borderColor="rgba(0,229,255,0.45)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="rgba(0,229,255,0.06)";e.currentTarget.style.borderColor="rgba(0,229,255,0.2)";}}>
+              ← BACK
+            </button>
+          )}
+          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: C.muted, letterSpacing: 3 }}>{breadcrumb}</div>
+        </div>
+        <h1 style={{ fontFamily: "'Orbitron',monospace", fontWeight: 900, fontSize: "clamp(2.2rem,5vw,4rem)", color: "#fff", lineHeight: 1.1, marginBottom: 16, marginTop: 8 }}>
+          {title} <Accent>{accent}</Accent>
+        </h1>
+        {subtitle && <p style={{ fontFamily: "'Syne',sans-serif", fontSize: "1rem", color: C.muted, maxWidth: 520, margin: "0 auto" }}>{subtitle}</p>}
+      </div>
+      {/* Bottom border glow */}
+      <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "60%", height: 1, background: `linear-gradient(90deg,transparent,${C.accent},transparent)`, opacity: .4 }} />
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE: HOME
+═══════════════════════════════════════════════════════════════ */
+function HomePage({ setPage }) {
+  const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  return (
+    <div className="page-enter">
+      {/* ── HERO ── */}
+      <div style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: `linear-gradient(180deg,#010810 0%,#020C1B 30%,#040F1F 60%,#071525 100%)`, overflow: "hidden" }}>
+        {/* Full underwater scene */}
+        <UnderwaterScene intensity={1} />
+        {/* Depth gradient overlay */}
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 30%,rgba(0,80,130,0.18),transparent 65%)" }} />
+        {/* Very subtle grid */}
+        <div style={{ position: "absolute", inset: 0, backgroundImage: `linear-gradient(rgba(0,229,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.04) 1px,transparent 1px)`, backgroundSize: "80px 80px", opacity: 1 }} />
+        {/* Bottom sea floor vignette */}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "18%", background: "linear-gradient(to top, rgba(0,10,20,0.7), transparent)" }} />
+
+        <div style={{ position: "relative", zIndex: 3, textAlign: "center", padding: "0 clamp(1rem,4vw,2rem)", maxWidth: 920, margin: "0 auto" }}>
+          {/* Badge */}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(0,229,255,0.07)", border: `1px solid rgba(0,229,255,0.2)`, borderRadius: 999, padding: "7px 20px", marginBottom: 36, backdropFilter: "blur(8px)" }}>
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: C.accent, animation: "pulse 2s infinite", boxShadow: `0 0 8px ${C.accent}` }} />
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: C.accent, letterSpacing: 3 }}>EST. 2013 · SRM IST · UNDERWATER ROBOTICS</span>
+          </div>
+
+          {/* Title */}
+          <h1 style={{ fontFamily: "'Orbitron',monospace", fontWeight: 900, fontSize: "clamp(3rem,8vw,7rem)", color: "#fff", lineHeight: .95, marginBottom: 20, letterSpacing: -1, textShadow: "0 0 60px rgba(0,229,255,0.15), 0 2px 40px rgba(0,0,0,0.8)" }}>
+            TEAM<br />
+            <span style={{ background: `linear-gradient(90deg,#00E5FF,#48CAE4,#00B4D8,#00E5FF)`, backgroundSize: "300% auto", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shine 5s linear infinite", filter: "drop-shadow(0 0 20px rgba(0,229,255,0.5))" }}>SRM AUV</span>
+          </h1>
+
+          <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "clamp(.75rem,1.5vw,.9rem)", color: "rgba(0,229,255,0.7)", letterSpacing: 5, textTransform: "uppercase", marginBottom: 32, textShadow: "0 0 20px rgba(0,229,255,0.4)" }}>
+            Engineering Depths · Navigating Future
+          </p>
+
+          <p style={{ fontFamily: "'Syne',sans-serif", fontSize: "clamp(.9rem,1.8vw,1.1rem)", color: C.muted, maxWidth: 600, margin: "0 auto 52px", lineHeight: 1.9 }}>
+            A multidisciplinary student engineering team dedicated to the design, development, and deployment of intelligent underwater robotic systems.
+          </p>
+
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", padding: "0 1rem" }}>
+            <Btn primary onClick={() => go("vehicles")}>Explore Vehicles</Btn>
+            <Btn onClick={() => go("nemo")}>Current Project</Btn>
+            <Btn onClick={() => go("contact")}>Sponsor Us</Btn>
+          </div>
+
+          {/* Stats */}
+          <div style={{ display: "flex", justifyContent: "center", gap: "clamp(16px,4vw,72px)", marginTop: 60, flexWrap: "wrap" }} className="stats-row">
+            {[["10+", "Years Active"], ["4", "Vehicles Built"], ["3", "Countries"], ["1", "National Title"]].map(([n, l]) => (
+              <div key={l} style={{ textAlign: "center" }}>
+                <div style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(1.6rem,3vw,2.8rem)", fontWeight: 900, color: C.accent, textShadow: `0 0 24px rgba(0,229,255,0.4)` }}>{n}</div>
+                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.muted, letterSpacing: 3, marginTop: 6, textTransform: "uppercase" }}>{l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div style={{ position: "absolute", bottom: 36, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, animation: "float 3s ease infinite", zIndex: 4 }}>
+          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: "rgba(0,229,255,0.5)", letterSpacing: 4 }}>DIVE IN</div>
+          <div style={{ width: 22, height: 34, border: "1.5px solid rgba(0,229,255,0.3)", borderRadius: 11, display: "flex", justifyContent: "center", paddingTop: 5 }}>
+            <div style={{ width: 3, height: 7, background: C.accent, borderRadius: 2, animation: "float 1.6s ease infinite", opacity: .8 }} />
+          </div>
+        </div>
+      </div>
+
+      {/* ── MISSION / VISION ── */}
+      <div style={{ background: C.bg1, padding: "clamp(50px,8vw,100px) clamp(1rem,4vw,2rem)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }} className="two-col">
+          {[
+            { label: "Our Mission", text: "Reimagine the knowledge from underwater robotics into producing intelligent solutions for the growing society, for a better tomorrow at depths unexplored.", icon: "🎯" },
+            { label: "Our Vision", text: "Emerge as a renowned underwater robotics systems lab centred at SRMIST, INDIA by inculcating a collaborative work culture and advancing marine technology.", icon: "🔭" },
+          ].map(({ label, text, icon }) => (
+            <Reveal key={label}>
+              <GlassCard style={{ padding: 40 }}>
+                <div style={{ fontSize: 36, marginBottom: 20 }}>{icon}</div>
+                <SectionLabel text={label} />
+                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: "1rem", color: C.text, lineHeight: 1.9 }}>{text}</p>
+              </GlassCard>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+
+      {/* ── QUICK LINKS ── */}
+      <div style={{ background: C.bg2, padding: "clamp(50px,8vw,100px) clamp(1rem,4vw,2rem)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <Reveal>
+            <div style={{ textAlign: "center", marginBottom: 60 }}>
+              <SectionLabel text="Explore" />
+              <SectionTitle>Navigate the <Accent>Team</Accent></SectionTitle>
+            </div>
+          </Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 20 }}>
+            {[
+              { icon: "👥", title: "Team", sub: "Meet the team", page: "team" },
+              { icon: "🤖", title: "Vehicles", sub: "Our AUV history", page: "vehicles" },
+              { icon: "🌊", title: "NEMO", sub: "Current project", page: "nemo" },
+              { icon: "🏆", title: "Achievements", sub: "Awards & milestones", page: "achievements" },
+              { icon: "🌐", title: "Competitions", sub: "Our competition history", page: "competitions" },
+              { icon: "📸", title: "Gallery", sub: "Photos & media", page: "gallery" },
+            ].map(({ icon, title, sub, page }) => (
+              <Reveal key={page}>
+                <GlassCard style={{ padding: 28, cursor: "pointer", textAlign: "center" }}>
+                  <div onClick={() => go(page)}>
+                    <div style={{ fontSize: 32, marginBottom: 12 }}>{icon}</div>
+                    <div style={{ fontFamily: "'Orbitron',monospace", fontSize: "0.85rem", fontWeight: 700, color: "#fff", marginBottom: 6 }}>{title}</div>
+                    <div style={{ fontFamily: "'Syne',sans-serif", fontSize: "0.8rem", color: C.muted }}>{sub}</div>
+                  </div>
+                </GlassCard>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── TEAM PHOTO STRIP ── */}
+      <div style={{ background: C.bg2, padding: "0 2rem 100px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <Reveal>
+            <div style={{ position: "relative", borderRadius: 20, overflow: "hidden", border: `1px solid ${C.border}`, boxShadow: "0 40px 80px rgba(0,0,0,0.5)" }}>
+              <img src={PHOTOS.team} alt="Team SRM AUV"
+                style={{ width: "100%", height: 480, objectFit: "cover", objectPosition: "center top", display: "block" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 180, background: "linear-gradient(to top, rgba(2,12,27,0.95), transparent)" }} />
+              <div style={{ position: "absolute", bottom: 32, left: 40 }}>
+                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: C.accent, letterSpacing: 4, marginBottom: 6 }}>THE TEAM · 2024–2025</div>
+                <div style={{ fontFamily: "'Orbitron',monospace", fontSize: "1.2rem", fontWeight: 700, color: "#fff" }}>Team SRM AUV — SRM Institute of Science & Technology</div>
+              </div>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, border: "1px solid rgba(0,229,255,0.15)", borderRadius: 20, pointerEvents: "none" }} />
+            </div>
+          </Reveal>
+        </div>
+      </div>
+
+      {/* ── SPONSOR STRIP ── */}
+      <div style={{ background: C.bg0, padding: "clamp(32px,6vw,64px) clamp(1rem,4vw,2rem)", borderTop: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", textAlign: "center" }}>
+          <Reveal>
+            <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: C.muted, letterSpacing: 4, marginBottom: 32 }}>INDUSTRY & INSTITUTIONAL SPONSORS</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 16, justifyContent: "center" }}>
+              {["NVIDIA", "Blue Robotics", "SOLIDWORKS", "MATLAB", "Altium", "PCB Power Market", "Water Linked", "NIOT", "IEEE-OES"].map(s => (
+                <div key={s} style={{ padding: "10px 20px", background: "rgba(255,255,255,0.02)", border: `1px solid ${C.border}`, borderRadius: 8, fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: C.muted, letterSpacing: 1 }}>{s}</div>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE: ABOUT
+═══════════════════════════════════════════════════════════════ */
+function AboutPage({ goBack, canGoBack }) {
+  const domains = [
+    { icon: "⚙️", title: "Mechanical Team", desc: "Vehicle structure, hydrodynamic design, buoyancy control, and modular integration ensuring stability in underwater conditions." },
+    { icon: "⚡", title: "Electrical Team", desc: "Power systems, onboard electronics, sensor interfacing, and safety mechanisms enabling reliable operation." },
+    { icon: "💻", title: "Software Team", desc: "Control logic, perception systems, and navigation frameworks for precise maneuvering and intelligent decision-making." },
+    { icon: "🤝", title: "Corporate Team", desc: "Outreach, partnerships, documentation, and logistics supporting smooth operations and continuity." },
+  ];
+  return (
+    <div className="page-enter">
+      <PageHero title="About" accent="Us" breadcrumb="Home / About" subtitle="Learn about our team, structure, and faculty guidance" onBack={goBack} canGoBack={canGoBack} />
+      <div style={{ background: C.bg1, padding: "clamp(40px,8vw,80px) clamp(1rem,4vw,2rem)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          {/* Overview */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center", marginBottom: 100 }} className="two-col">
+            <Reveal>
+              <SectionLabel text="Who We Are" />
+              <SectionTitle>Team <Accent>Overview</Accent></SectionTitle>
+              <p style={{ fontFamily: "'Syne',sans-serif", fontSize: "1rem", color: C.text, lineHeight: 1.9, marginTop: 20, marginBottom: 24 }}>
+                Established in 2013, Team SRM AUV is a multidisciplinary, student-driven technical team from SRM Institute of Science and Technology. The team is dedicated to the design, development, and deployment of intelligent underwater robotic systems.
+              </p>
+              <p style={{ fontFamily: "'Syne',sans-serif", fontSize: "1rem", color: C.muted, lineHeight: 1.9 }}>
+                What began as a student initiative has grown into one of SRM's flagship technical teams, representing the institution at national and international platforms while nurturing industry-ready engineering talent.
+              </p>
+            </Reveal>
+            <Reveal delay={150}>
+              {/* Team Photo */}
+              <div style={{ position: "relative", borderRadius: 16, overflow: "hidden", border: `1px solid ${C.border}`, boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
+                <img src={PHOTOS.team} alt="Team SRM AUV"
+                  style={{ width: "100%", height: 380, objectFit: "cover", objectPosition: "center top", display: "block" }} />
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 100, background: "linear-gradient(to top, rgba(10,25,47,0.95), transparent)" }} />
+                <div style={{ position: "absolute", bottom: 16, left: 20 }}>
+                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.accent, letterSpacing: 3 }}>TEAM SRM AUV · 2024–25</div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* Domains */}
+          <Reveal>
+            <div style={{ textAlign: "center", marginBottom: 48 }}>
+              <SectionLabel text="Structure" />
+              <SectionTitle>Domains of <Accent>Expertise</Accent></SectionTitle>
+            </div>
+          </Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 20, marginBottom: 80 }}>
+            {domains.map((d, i) => (
+              <Reveal key={d.title} delay={i * 80}>
+                <GlassCard style={{ padding: 32 }}>
+                  <div style={{ fontSize: 32, marginBottom: 16 }}>{d.icon}</div>
+                  <h3 style={{ fontFamily: "'Orbitron',monospace", fontSize: ".85rem", fontWeight: 700, color: "#fff", marginBottom: 12, letterSpacing: 1 }}>{d.title}</h3>
+                  <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".875rem", color: C.muted, lineHeight: 1.8 }}>{d.desc}</p>
+                </GlassCard>
+              </Reveal>
+            ))}
+          </div>
+
+          {/* Faculty */}
+          <Reveal>
+            <GlassCard style={{ padding: 48 }} hover={false}>
+              <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 40, alignItems: "center" }} className="faculty-grid">
+                <div style={{ width: 130, height: 130, borderRadius: "50%", overflow: "hidden", border: `3px solid ${C.accent}50`, flexShrink: 0, margin: "0 auto", boxShadow: `0 0 24px rgba(0,229,255,0.2)` }}>
+                    <img src={PHOTOS.faculty} alt="Dr. Annapurani" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
+                  </div>
+                <div>
+                  <SectionLabel text="Faculty Guidance" />
+                  <h3 style={{ fontFamily: "'Orbitron',monospace", fontSize: "1.2rem", fontWeight: 800, color: "#fff", marginBottom: 6 }}>Dr. Annapurani Panaiyappan Kumarappan</h3>
+                  <p style={{ fontFamily: "'Syne',sans-serif", fontSize: "0.9rem", color: C.accent, marginBottom: 16 }}>Professor, Department of Computer Science & Engineering · SRM IST</p>
+                  <p style={{ fontFamily: "'Syne',sans-serif", fontSize: "0.95rem", color: C.text, lineHeight: 1.8 }}>Her guidance provides the team with strong academic grounding while encouraging innovation, discipline, and practical engineering thinking. Under her mentorship, the team follows structured design practices and systematic development cycles, ensuring each project balances experimentation with reliability.</p>
+                </div>
+              </div>
+            </GlassCard>
+          </Reveal>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE: TEAM
+═══════════════════════════════════════════════════════════════ */
+function TeamPage({ goBack, canGoBack }) {
+  const leads = [
+    { name: "Team Lead", role: "Overall Team Leadership & Strategy", domain: "Leadership", photo: PHOTOS.teamLead },
+    { name: "Mechanical Lead", role: "Vehicle Design & Fabrication", domain: "Mechanical", photo: PHOTOS.mechanicalLead },
+    { name: "Electrical Lead", role: "Power & Electronics Systems", domain: "Electrical", photo: PHOTOS.electricalLead },
+    { name: "Software Lead", role: "Autonomy & Perception Systems", domain: "Software", photo: PHOTOS.softwareLead },
+    { name: "Team Manager", role: "Outreach, Partnerships & Logistics", domain: "Corporate", photo: PHOTOS.teamManager },
+  ];
+  return (
+    <div className="page-enter">
+      <PageHero title="Our" accent="Team" breadcrumb="Home / Team" subtitle="The passionate engineers building the future of underwater robotics" onBack={goBack} canGoBack={canGoBack} />
+      <div style={{ background: C.bg1, padding: "clamp(40px,8vw,80px) clamp(1rem,4vw,2rem)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <Reveal>
+            <div style={{ textAlign: "center", marginBottom: 60 }}>
+              <SectionLabel text="Leadership" />
+              <SectionTitle>Team <Accent>Structure</Accent></SectionTitle>
+            </div>
+          </Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 16, marginBottom: 60 }}>
+            {leads.map((l, i) => (
+              <Reveal key={l.name} delay={i * 80}>
+                <GlassCard style={{ padding: 0, overflow: "hidden", textAlign: "center" }}>
+                  {/* Photo */}
+                  <div style={{ position: "relative", height: 240, overflow: "hidden" }}>
+                    <img src={l.photo} alt={l.name}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 10%", display: "block", transition: "transform .4s ease" }}
+                      onMouseEnter={e => e.target.style.transform = "scale(1.06)"}
+                      onMouseLeave={e => e.target.style.transform = "scale(1)"}
+                    />
+                    {/* gradient overlay */}
+                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 100, background: "linear-gradient(to top, rgba(10,25,47,1), transparent)" }} />
+                    {/* Domain badge */}
+                    <div style={{ position: "absolute", top: 12, right: 12, padding: "4px 10px", background: "rgba(0,229,255,0.15)", border: `1px solid rgba(0,229,255,0.3)`, borderRadius: 999, fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: C.accent, letterSpacing: 2 }}>{l.domain.toUpperCase()}</div>
+                  </div>
+                  {/* Info */}
+                  <div style={{ padding: "16px 20px 24px" }}>
+                    <h3 style={{ fontFamily: "'Orbitron',monospace", fontSize: ".82rem", fontWeight: 700, color: "#fff", marginBottom: 6, letterSpacing: .5 }}>{l.name}</h3>
+                    <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".78rem", color: C.muted, lineHeight: 1.5 }}>{l.role}</p>
+                  </div>
+                </GlassCard>
+              </Reveal>
+            ))}
+          </div>
+
+          {/* Department breakdown */}
+          {["Mechanical", "Electrical", "Software", "Corporate"].map((dept, di) => (
+            <Reveal key={dept} delay={di * 60}>
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 24px", background: "rgba(0,229,255,0.04)", border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: 2 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.accent, boxShadow: `0 0 8px ${C.accent}` }} />
+                  <span style={{ fontFamily: "'Orbitron',monospace", fontSize: ".85rem", color: "#fff", fontWeight: 600, letterSpacing: 1 }}>{dept} Division</span>
+                  <div style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.muted }}>ACTIVE</div>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+
+          <Reveal>
+            <GlassCard style={{ padding: 48, marginTop: 60, textAlign: "center" }} hover={false}>
+              <div style={{ fontSize: 40, marginBottom: 20 }}>🌊</div>
+              <h3 style={{ fontFamily: "'Orbitron',monospace", fontSize: "1.1rem", color: "#fff", marginBottom: 16 }}>Join Team SRM AUV</h3>
+              <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".95rem", color: C.text, maxWidth: 500, margin: "0 auto 24px", lineHeight: 1.8 }}>We welcome passionate students from all engineering disciplines. If you're interested in underwater robotics, reach out to us.</p>
+              <Btn primary onClick={() => document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth" })}>Get In Touch</Btn>
+            </GlassCard>
+          </Reveal>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE: VEHICLES
+═══════════════════════════════════════════════════════════════ */
+function VehiclesPage({ setPage, goBack, canGoBack }) {
+  const vehicles = [
+    { id: "01", name: "Sedna", years: "2014–2016", type: "AUV", color: C.accent3, photo: PHOTOS.sedna, desc: "One of the team's earliest vehicles. Sedna laid the technical foundation through initial work in underwater navigation, multi-axis control, and sensor integration — marking the beginning of Team SRM AUV's competitive journey.", features: ["Multi-axis underwater navigation", "Initial sensor integration suite", "Foundational control architecture", "First competition deployment"], competitions: ["NIOT SAVe 2015 – National Champions"] },
+    { id: "02", name: "Alpheus", years: "2017", type: "AUV", color: C.accent, photo: PHOTOS.alpheus, desc: "Alpheus introduced a significantly improved mechanical design and enhanced subsystem coordination, resulting in better maneuverability, stability, and structured underwater task execution.", features: ["Improved hydrodynamic hull", "Enhanced subsystem coordination", "Better thruster configuration", "Structured task execution"], competitions: ["SAUVC Singapore", "NIOT SAVe 2017"] },
+    { id: "03", name: "Zarna", years: "2018–2019", type: "AUV", color: "#00B4D8", photo: PHOTOS.zarna, desc: "Zarna marked a major step in mission readiness, featuring enhanced sensing, refined control strategies, and task-oriented mechanisms for complex underwater operations.", features: ["Enhanced sensing array", "Refined PID control system", "Task-oriented actuators", "Improved waterproofing"], competitions: ["AUVSI RoboSub USA", "SAUVC 2018", "NIOT SAVe 2019"] },
+    { id: "04", name: "Vatkhd", years: "2023–2024", type: "AUV", color: "#90E0EF", photo: PHOTOS.vatkhd, desc: "Vatkhd was developed as a reliable, recent-generation platform focused on navigation refinement, vision-based perception, and comprehensive system validation before deployment.", features: ["Vision-based perception (YOLOv8)", "Navigation refinement algorithms", "System validation pipeline", "Modular electronic bays"], competitions: ["TAC 2024 Norway", "NIOT SAVe 2024"] },
+    { id: "05", name: "NEMO", years: "2025–2026", type: "ROV", color: "#00E5FF", photo: PHOTOS.nemo, desc: "NEMO is our current Remotely Operated Vehicle, designed for underwater inspection and task-oriented operations. It emphasizes structural robustness, precise 6-DOF maneuverability, and real-time visual feedback through an integrated camera system.", features: ["6-DOF Thruster Configuration", "Real-time Camera System", "Modular Aluminium + HDPE Frame", "Surface Tether + Onboard MCU", "Pool-validated & Deployment Ready"], competitions: ["Active Competition Season 2025–2026"] },
+  ];
+  const [active, setActive] = useState(null);
+  return (
+    <div className="page-enter">
+      <PageHero title="Our" accent="Vehicles" breadcrumb="Home / Vehicles" subtitle="A decade of underwater vehicle development — from Sedna to NEMO" onBack={goBack} canGoBack={canGoBack} />
+      <div style={{ background: C.bg1, padding: "clamp(40px,8vw,80px) clamp(1rem,4vw,2rem)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          {/* Timeline */}
+          <div style={{ position: "relative", marginBottom: "clamp(40px,8vw,80px)" }}>
+            <div style={{ position: "absolute", left: "50%", top: 0, bottom: 0, width: 1, background: `linear-gradient(to bottom,${C.accent},${C.accent2})`, transform: "translateX(-50%)", opacity: .25, display: "var(--timeline-line, block)" }} />
+            {vehicles.map((v, i) => (
+              <Reveal key={v.id} delay={i * 100}>
+                <VehicleRow v={v} i={i} active={active} setActive={setActive} setPage={setPage} />
+              </Reveal>
+            ))}
+          </div>
+
+          {/* NEMO teaser */}
+          <Reveal>
+            <GlassCard style={{ padding: 48, textAlign: "center", borderColor: `rgba(0,229,255,0.3)` }} hover={false}>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: C.accent, letterSpacing: 4, marginBottom: 12 }}>CURRENT PROJECT · 2025–2026</div>
+              <h3 style={{ fontFamily: "'Orbitron',monospace", fontSize: "2rem", fontWeight: 900, color: "#fff", marginBottom: 12 }}>NEMO <span style={{ fontSize: "0.9rem", color: C.muted, fontWeight: 400 }}>— Remotely Operated Vehicle</span></h3>
+              <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".95rem", color: C.muted, maxWidth: 560, margin: "0 auto 24px", lineHeight: 1.8 }}>Our latest platform under active development. Focused on inspection and task-oriented underwater operations.</p>
+              <Btn primary onClick={() => { setPage("nemo"); window.scrollTo({ top: 0 }); }}>View NEMO Project</Btn>
+            </GlassCard>
+          </Reveal>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VehicleRow({ v, i, active, setActive, setPage }) {
+  const isMobile = useIsMobile();
+  if (isMobile) {
+    return (
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+          <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${v.color}20`, border: `2px solid ${v.color}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Orbitron',monospace", fontWeight: 900, fontSize: 10, color: v.color, flexShrink: 0 }}>{v.id}</div>
+          <div style={{ height: 1, flex: 1, background: `linear-gradient(to right, ${v.color}50, transparent)` }} />
+        </div>
+        <VehicleCard v={v} active={active} setActive={setActive} setPage={setPage} />
+      </div>
+    );
+  }
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr", gap: 0, marginBottom: 48, alignItems: "center" }}>
+      <div style={{ padding: i % 2 === 0 ? "0 32px 0 0" : "0", gridColumn: i % 2 === 0 ? 1 : 3 }}>
+        {i % 2 === 0 && <VehicleCard v={v} active={active} setActive={setActive} setPage={setPage} />}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gridColumn: 2 }}>
+        <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${v.color}20`, border: `2px solid ${v.color}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Orbitron',monospace", fontWeight: 900, fontSize: 11, color: v.color, boxShadow: `0 0 16px ${v.color}40`, zIndex: 2 }}>{v.id}</div>
+      </div>
+      <div style={{ padding: i % 2 === 1 ? "0 0 0 32px" : "0", gridColumn: i % 2 === 1 ? 3 : 1 }}>
+        {i % 2 === 1 && <VehicleCard v={v} active={active} setActive={setActive} setPage={setPage} />}
+      </div>
+    </div>
+  );
+}
+
+function VehicleCard({ v, active, setActive, setPage }) {
+  const isActive = active === v.id;
+  return (
+    <GlassCard style={{ padding: 0, overflow: "hidden", borderColor: isActive ? v.color + "60" : C.border }}>
+      {/* Real vehicle photo */}
+      <div style={{ position: "relative", height: 220, overflow: "hidden" }}>
+        <img src={v.photo} alt={v.name}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", transition: "transform .5s ease" }}
+          onMouseEnter={e => e.target.style.transform = "scale(1.06)"}
+          onMouseLeave={e => e.target.style.transform = "scale(1)"}
+        />
+        {/* Overlay */}
+        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, ${C.bg1}F0 0%, transparent 50%, rgba(0,0,0,0.2) 100%)` }} />
+        {/* Year badge */}
+        <div style={{ position: "absolute", top: 14, right: 14, padding: "4px 12px", background: `${v.color}25`, border: `1px solid ${v.color}50`, borderRadius: 999, fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: v.color, backdropFilter: "blur(8px)" }}>{v.years}</div>
+        {/* ID */}
+        <div style={{ position: "absolute", top: 14, left: 14, fontFamily: "'Orbitron',monospace", fontWeight: 900, fontSize: "1.8rem", color: `${v.color}30`, lineHeight: 1 }}>{v.id}</div>
+      </div>
+      <div style={{ padding: 28 }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: v.color, letterSpacing: 3, marginBottom: 6 }}>{v.type}</div>
+        <h3 style={{ fontFamily: "'Orbitron',monospace", fontSize: "1.4rem", fontWeight: 900, color: "#fff", marginBottom: 10 }}>{v.name}</h3>
+        <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".875rem", color: C.muted, lineHeight: 1.8, marginBottom: 16 }}>{v.desc}</p>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Btn small onClick={() => setActive(isActive ? null : v.id)}>{isActive ? "Less Info" : "View Details"}</Btn>
+        </div>
+        {isActive && (
+          <div style={{ marginTop: 20, animation: "fadeIn .4s ease" }}>
+            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.muted, letterSpacing: 3, marginBottom: 10 }}>KEY FEATURES</div>
+            {v.features.map(f => (
+              <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <div style={{ width: 4, height: 4, borderRadius: "50%", background: v.color, flexShrink: 0 }} />
+                <span style={{ fontFamily: "'Syne',sans-serif", fontSize: ".82rem", color: C.text }}>{f}</span>
+              </div>
+            ))}
+            <div style={{ marginTop: 14, fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.muted, letterSpacing: 3, marginBottom: 10 }}>COMPETITIONS</div>
+            {v.competitions.map(c => (
+              <div key={c} style={{ padding: "6px 10px", background: `${v.color}0A`, border: `1px solid ${v.color}20`, borderRadius: 6, fontFamily: "'Syne',sans-serif", fontSize: ".8rem", color: C.text, marginBottom: 6 }}>{c}</div>
+            ))}
+          </div>
+        )}
+      </div>
+    </GlassCard>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE: NEMO
+═══════════════════════════════════════════════════════════════ */
+function NemoPage({ setPage, goBack, canGoBack }) {
+  const specs = [
+    ["Type", "Remotely Operated Vehicle (ROV)"], ["Cycle", "2025–2026"],
+    ["Drive", "6-DOF Thruster Configuration"], ["Vision", "Real-time Camera System"],
+    ["Frame", "Modular Aluminium + HDPE"], ["Power", "Battery Pack + Tether"],
+    ["Control", "Surface Tether + Onboard MCU"], ["Testing", "Pool-validated"],
+  ];
+  const features = [
+    { icon: "🏗️", title: "Structural Robustness", desc: "Engineered for reliability in challenging underwater environments with modular frame architecture." },
+    { icon: "🎯", title: "Precise Maneuverability", desc: "6-DOF thruster arrangement enables accurate positioning and controlled movement in all axes." },
+    { icon: "🔧", title: "Modular Integration", desc: "Plug-and-play subsystem design allows rapid reconfiguration and field maintenance." },
+    { icon: "📷", title: "Real-time Visual Feedback", desc: "Onboard cameras provide live visual feed for inspection and task-oriented operations." },
+    { icon: "🧭", title: "Controlled Navigation", desc: "Precision depth control and directional stability for reliable underwater task execution." },
+    { icon: "🔬", title: "Iterative Validation", desc: "Extensive dry-testing and pool-testing cycles ensure deployment readiness." },
+  ];
+  return (
+    <div className="page-enter">
+      <PageHero title="Project" accent="NEMO" breadcrumb="Home / Vehicles / NEMO" subtitle="Our current remotely operated vehicle — 2025/2026 development cycle" onBack={goBack} canGoBack={canGoBack} />
+      <div style={{ background: C.bg1, padding: "clamp(40px,8vw,80px) clamp(1rem,4vw,2rem)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          {/* Hero block */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center", marginBottom: 80 }} className="two-col nemo-grid">
+            <Reveal>
+              <div style={{ position: "relative", borderRadius: 20, overflow: "hidden", border: `1px solid ${C.border}`, boxShadow: "0 32px 80px rgba(0,0,0,0.6)" }}>
+                <img src={PHOTOS.nemo} alt="NEMO ROV"
+                  style={{ width: "100%", height: 380, objectFit: "cover", objectPosition: "center", display: "block" }} />
+                {/* Scan line overlay */}
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,229,255,0.03) 0%, transparent 50%, rgba(0,0,0,0.3) 100%)", pointerEvents: "none" }} />
+                {/* HUD elements */}
+                <div style={{ position: "absolute", top: 16, left: 16, fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.accent, letterSpacing: 3, background: "rgba(0,0,0,0.5)", padding: "4px 10px", borderRadius: 4, backdropFilter: "blur(8px)" }}>● LIVE · ROV NEMO</div>
+                <div style={{ position: "absolute", bottom: 16, right: 16, fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.accent, letterSpacing: 2, background: "rgba(0,0,0,0.5)", padding: "4px 10px", borderRadius: 4, backdropFilter: "blur(8px)" }}>2025–2026</div>
+                {/* Corner brackets */}
+                {[{t:"top:12px;left:12px", b:"borderTop:2px solid;borderLeft:2px solid"},
+                  {t:"top:12px;right:12px", b:"borderTop:2px solid;borderRight:2px solid"},
+                  {t:"bottom:12px;left:12px", b:"borderBottom:2px solid;borderLeft:2px solid"},
+                  {t:"bottom:12px;right:12px", b:"borderBottom:2px solid;borderRight:2px solid"}].map(({t,b},i) => {
+                    const pos = Object.fromEntries(t.split(";").map(p=>{const[k,v]=p.split(":");return[k,v];}));
+                    const brd = Object.fromEntries(b.split(";").map(p=>{const[k,v]=p.split(":");return[k,`2px solid rgba(0,229,255,0.5)`];}));
+                    return <div key={i} style={{ position:"absolute", width:20, height:20, ...pos, ...brd, borderWidth: undefined, ...Object.fromEntries(b.split(";").map(p=>{const[k,v]=p.split(":");return[k,`2px solid rgba(0,229,255,0.5)`];})) }} />;
+                })}
+              </div>
+            </Reveal>
+            <Reveal delay={100}>
+              <div style={{ display: "inline-block", background: "rgba(0,229,255,0.08)", border: `1px solid rgba(0,229,255,0.2)`, borderRadius: 4, padding: "5px 14px", marginBottom: 20 }}>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.accent, letterSpacing: 3 }}>ACTIVE DEVELOPMENT · 2025–2026</span>
+              </div>
+              <h2 style={{ fontFamily: "'Orbitron',monospace", fontSize: "clamp(2.5rem,5vw,4rem)", fontWeight: 900, color: "#fff", lineHeight: .95, marginBottom: 6 }}>NEMO</h2>
+              <p style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: ".8rem", color: C.accent, letterSpacing: 4, marginBottom: 24 }}>REMOTELY OPERATED VEHICLE</p>
+              <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".95rem", color: C.text, lineHeight: 1.9, marginBottom: 28 }}>
+                NEMO is Team SRM AUV's current underwater vehicle, designed as an ROV for underwater inspection and task-oriented operations. The vehicle emphasizes structural robustness, precise maneuverability, and ease of maintenance through a modular design approach.
+              </p>
+              <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".95rem", color: C.muted, lineHeight: 1.9 }}>
+                NEMO integrates coordinated mechanical, electrical, and software systems to enable real-time visual feedback, controlled navigation, and interaction with underwater structures.
+              </p>
+            </Reveal>
+          </div>
+
+          {/* Specs table */}
+          <Reveal>
+            <div style={{ marginBottom: 64 }}>
+              <SectionLabel text="Technical Specifications" />
+              <SectionTitle>Vehicle <Accent>Specs</Accent></SectionTitle>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 2, marginTop: 32, border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden" }}>
+                {specs.map(([k, v]) => (
+                  <div key={k} style={{ display: "flex", gap: 16, padding: "16px 20px", background: "rgba(255,255,255,0.01)", borderBottom: `1px solid ${C.border}` }}>
+                    <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: C.accent, letterSpacing: 2, minWidth: 70, textTransform: "uppercase" }}>{k}</span>
+                    <span style={{ fontFamily: "'Syne',sans-serif", fontSize: ".875rem", color: C.text }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Features */}
+          <Reveal>
+            <div style={{ textAlign: "center", marginBottom: 40 }}>
+              <SectionLabel text="Capabilities" />
+              <SectionTitle>Key <Accent>Features</Accent></SectionTitle>
+            </div>
+          </Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 20 }}>
+            {features.map((f, i) => (
+              <Reveal key={f.title} delay={i * 70}>
+                <GlassCard style={{ padding: 28, display: "flex", gap: 16 }}>
+                  <div style={{ fontSize: 28, flexShrink: 0 }}>{f.icon}</div>
+                  <div>
+                    <h4 style={{ fontFamily: "'Orbitron',monospace", fontSize: ".8rem", color: C.accent, marginBottom: 8, letterSpacing: 1 }}>{f.title}</h4>
+                    <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".875rem", color: C.muted, lineHeight: 1.7 }}>{f.desc}</p>
+                  </div>
+                </GlassCard>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE: ACHIEVEMENTS
+═══════════════════════════════════════════════════════════════ */
+function AchievementsPage({ goBack, canGoBack }) {
+  const major = [
+    { emoji: "🏆", color: "#FFD700", title: "National Champions", year: "2015", event: "NIOT SAVe Competition", location: "Chennai, India", desc: "First place finish at the national underwater robotics championship, establishing Team SRM AUV as a top-tier team in India.", photo: null },
+    { emoji: "🌟", color: C.accent, title: "Top International Finish", year: "2018", event: "SAUVC", location: "Singapore", desc: "Strong performance at the Singapore Autonomous Underwater Vehicle Challenge, competing against top global teams.", photo: null },
+    { emoji: "🥉", color: "#CD7F32", title: "3rd Place — NEXUS'24", year: "2024", event: "National Technical Hackathon", location: "Chennai Institute of Technology", desc: "2nd Runner-Up at the prestigious national-level technical hackathon, showcasing innovation in underwater systems.", photo: null },
+    { emoji: "🥇", color: "#FFD700", title: "Winner — MarinaX 2025", year: "2025", event: "Underwater Robotics Competition", location: "VIT Vellore", desc: "First place at the national-level MarinaX underwater robotics competition, demonstrating excellence in ROV design.", photo: PHOTOS.marinaWin },
+  ];
+  const recognition = [
+    { icon: "🏛️", title: "Govt-Sponsored International Representation", desc: "Selected and sponsored by the Government of India to represent the nation at international underwater robotics competitions." },
+    { icon: "💡", title: "I4C Innovation Recognition", desc: "Shortlisted among Top Innovations nationwide under the Make in India campaign through the I4C Idea Innovation Challenge." },
+    { icon: "🖥️", title: "NVIDIA GPU Grant", desc: "Received industry-backed computational resources from NVIDIA supporting advanced vision processing and system development." },
+    { icon: "📅", title: "10+ Years of Excellence", desc: "Sustained participation across national and international platforms for over a decade — a testament to the team's resilience and commitment." },
+  ];
+  return (
+    <div className="page-enter">
+      <PageHero title="Achievements &" accent="Milestones" breadcrumb="Home / Achievements" subtitle="A decade of excellence in underwater robotics competitions worldwide" onBack={goBack} canGoBack={canGoBack} />
+      <div style={{ background: C.bg1, padding: "clamp(40px,8vw,80px) clamp(1rem,4vw,2rem)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <Reveal><div style={{ textAlign: "center", marginBottom: 52 }}><SectionLabel text="Competition Wins" /><SectionTitle>Major <Accent>Achievements</Accent></SectionTitle></div></Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 24, marginBottom: 80 }}>
+            {major.map((m, i) => (
+              <Reveal key={m.title} delay={i * 80}>
+                <AchievementCard {...m} />
+              </Reveal>
+            ))}
+          </div>
+          <Reveal><div style={{ textAlign: "center", marginBottom: 52 }}><SectionLabel text="Recognition" /><SectionTitle>Recognition & <Accent>Milestones</Accent></SectionTitle></div></Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 20 }}>
+            {recognition.map((r, i) => (
+              <Reveal key={r.title} delay={i * 80}>
+                <GlassCard style={{ padding: 28 }}>
+                  <div style={{ fontSize: 28, marginBottom: 14 }}>{r.icon}</div>
+                  <h4 style={{ fontFamily: "'Orbitron',monospace", fontSize: ".78rem", color: C.accent, marginBottom: 10, letterSpacing: 1 }}>{r.title}</h4>
+                  <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".875rem", color: C.muted, lineHeight: 1.7 }}>{r.desc}</p>
+                </GlassCard>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AchievementCard({ emoji, color, title, year, event, location, desc, photo }) {
+  const [h, setH] = useState(false);
+  return (
+    <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      style={{ background: h ? `${color}09` : "rgba(255,255,255,0.018)", border: `1px solid ${h ? `${color}50` : C.border}`, borderRadius: 16, overflow: "hidden", transition: "all .4s", transform: h ? "translateY(-6px) scale(1.02)" : "none", boxShadow: h ? `0 20px 50px ${color}18` : "none", cursor: "default" }}>
+      {/* Photo if available, else emoji */}
+      {photo ? (
+        <div style={{ position: "relative", height: 200, overflow: "hidden" }}>
+          <img src={photo} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", transition: "transform .5s", transform: h ? "scale(1.06)" : "scale(1)" }} />
+          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, rgba(10,25,47,0.95) 0%, transparent 60%)` }} />
+          <div style={{ position: "absolute", top: 12, right: 12, fontSize: 28 }}>{emoji}</div>
+        </div>
+      ) : (
+        <div style={{ padding: "32px 32px 0", textAlign: "center" }}>
+          <div style={{ fontSize: 44, marginBottom: 4, filter: h ? `drop-shadow(0 0 16px ${color})` : "none", transition: "filter .4s" }}>{emoji}</div>
+        </div>
+      )}
+      <div style={{ padding: photo ? "16px 24px 28px" : "0 32px 32px", textAlign: "center" }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: color, letterSpacing: 3, marginBottom: 6, marginTop: photo ? 0 : 12 }}>{year} · {location}</div>
+        <h3 style={{ fontFamily: "'Orbitron',monospace", fontSize: ".85rem", fontWeight: 700, color: h ? color : "#fff", marginBottom: 6, letterSpacing: .5, transition: "color .3s" }}>{title}</h3>
+        <div style={{ fontFamily: "'Syne',sans-serif", fontSize: ".82rem", color: C.muted, marginBottom: 10 }}>{event}</div>
+        <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".82rem", color: C.muted, lineHeight: 1.7 }}>{desc}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE: COMPETITIONS
+═══════════════════════════════════════════════════════════════ */
+function CompetitionsPage({ goBack, canGoBack }) {
+  const intl = [
+    { flag: "🇺🇸", name: "AUVSI RoboSub", location: "San Diego, USA", org: "RoboNation / AUVSI", desc: "The world's premier autonomous underwater vehicle competition. Teams design, build, and test AUVs to complete a series of underwater tasks autonomously.", years: "Multiple years", result: "Participated", photo: null },
+    { flag: "🇸🇬", name: "SAUVC", location: "Singapore", org: "Singapore AUV Challenge Committee", desc: "Top international AUV competition evaluating teams on navigation, obstacle avoidance, and mission execution in an outdoor pool environment.", years: "Multiple years", result: "Top Finish", photo: null },
+    { flag: "🇳🇴", name: "TAC 2024", location: "Norway", org: "Underwater Robotics Challenge", desc: "International underwater robotics challenge held in Norway. Team SRM AUV represented India in this prestigious European competition.", years: "2024", result: "Participated", photo: PHOTOS.tacComp },
+  ];
+  const natl = [
+    { flag: "🇮🇳", name: "NIOT SAVe", location: "Chennai, India", org: "National Institute of Ocean Technology (NIOT) × IEEE-OES", desc: "India's flagship autonomous underwater vehicle competition. Team SRM AUV claimed the National Championship title in 2015.", years: "Multiple years", result: "🏆 National Champions (2015)", photo: null },
+    { flag: "🇮🇳", name: "NEXUS'24", location: "Chennai Institute of Technology", org: "CIT National Hackathon", desc: "National-level technical innovation hackathon. Team SRM AUV achieved 3rd Place in the 2024 edition.", years: "2024", result: "🥉 3rd Place", photo: null },
+    { flag: "🇮🇳", name: "MarinaX", location: "VIT Vellore", org: "Vellore Institute of Technology", desc: "National-level underwater robotics competition held at VIT Vellore. Team SRM AUV won the 2025 edition.", years: "2025", result: "🥇 1st Place Winner", photo: PHOTOS.marinaWin },
+  ];
+  return (
+    <div className="page-enter">
+      <PageHero title="Competitions &" accent="Events" breadcrumb="Home / Competitions" subtitle="Competing at the highest levels — from India to Singapore to Norway" onBack={goBack} canGoBack={canGoBack} />
+      <div style={{ background: C.bg1, padding: "clamp(40px,8vw,80px) clamp(1rem,4vw,2rem)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          {/* International */}
+          <Reveal><div style={{ marginBottom: 48 }}><SectionLabel text="International" /><SectionTitle>Global <Accent>Competitions</Accent></SectionTitle></div></Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(320px,100%),1fr))", gap: 20, marginBottom: 60 }}>
+            {intl.map((c, i) => (
+              <Reveal key={c.name} delay={i * 80}><CompCard {...c} /></Reveal>
+            ))}
+          </div>
+          {/* National */}
+          <Reveal><div style={{ marginBottom: 48 }}><SectionLabel text="National" /><SectionTitle>Indian <Accent>Championships</Accent></SectionTitle></div></Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(320px,100%),1fr))", gap: 20, marginBottom: 60 }}>
+            {natl.map((c, i) => (
+              <Reveal key={c.name} delay={i * 80}><CompCard {...c} /></Reveal>
+            ))}
+          </div>
+          {/* Exhibitions */}
+          <Reveal>
+            <SectionLabel text="Outreach & Exhibitions" />
+            <SectionTitle>Beyond <Accent>Competitions</Accent></SectionTitle>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 16, marginTop: 32 }}>
+              {[
+                { icon: "🏭", name: "ACMEE Exhibition", desc: "International Machine Tool Exhibition — showcased underwater robotics to industry professionals." },
+                { icon: "📰", name: "Indian Express EdEx Expo", desc: "Participated in the national education and innovation expo organized by Indian Express." },
+                { icon: "🎉", name: "Aarush — SRM Techno Fest", desc: "Conducted workshops and demonstrations at SRM's flagship annual techno-management festival." },
+              ].map((e, i) => (
+                <Reveal key={e.name} delay={i * 80}>
+                  <GlassCard style={{ padding: 24 }}>
+                    <div style={{ fontSize: 28, marginBottom: 12 }}>{e.icon}</div>
+                    <h4 style={{ fontFamily: "'Orbitron',monospace", fontSize: ".78rem", color: "#fff", marginBottom: 8 }}>{e.name}</h4>
+                    <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".85rem", color: C.muted, lineHeight: 1.7 }}>{e.desc}</p>
+                  </GlassCard>
+                </Reveal>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CompCard({ flag, name, location, org, desc, years, result, photo }) {
+  const [h, setH] = useState(false);
+  return (
+    <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      style={{ background: h ? "rgba(0,229,255,0.05)" : "rgba(255,255,255,0.018)", border: `1px solid ${h ? C.borderHover : C.border}`, borderRadius: 16, overflow: "hidden", transition: "all .4s", transform: h ? "translateY(-5px)" : "none", boxShadow: h ? "0 0 40px rgba(0,229,255,0.08),0 20px 60px rgba(0,0,0,.4)" : "0 4px 24px rgba(0,0,0,.3)" }}>
+      {photo ? (
+        <div style={{ position: "relative", height: 200, overflow: "hidden" }}>
+          <img src={photo} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", transition: "transform .5s", transform: h ? "scale(1.05)" : "scale(1)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(10,25,47,0.9) 0%, transparent 60%)" }} />
+          <div style={{ position: "absolute", top: 12, right: 12, padding: "3px 10px", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", borderRadius: 4, fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: C.accent, letterSpacing: 2 }}>{years}</div>
+          <div style={{ position: "absolute", bottom: 12, left: 16, fontSize: 24 }}>{flag}</div>
+        </div>
+      ) : (
+        <div style={{ height: 72, background: "linear-gradient(135deg,rgba(0,119,182,0.08),rgba(0,229,255,0.03))", display: "flex", alignItems: "center", padding: "0 20px", gap: 12 }}>
+          <span style={{ fontSize: 28 }}>{flag}</span>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.muted, letterSpacing: 2 }}>{years}</span>
+        </div>
+      )}
+      <div style={{ padding: 24 }}>
+        <h3 style={{ fontFamily: "'Orbitron',monospace", fontSize: ".88rem", fontWeight: 700, color: "#fff", marginBottom: 4 }}>{name}</h3>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.accent, letterSpacing: 2, marginBottom: 4 }}>{location}</div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: C.muted, letterSpacing: 1, marginBottom: 12 }}>{org}</div>
+        <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".87rem", color: C.muted, lineHeight: 1.7, marginBottom: 14 }}>{desc}</p>
+        <div style={{ padding: "8px 14px", background: "rgba(0,229,255,0.06)", border: `1px solid ${C.border}`, borderRadius: 6, fontFamily: "'Syne',sans-serif", fontSize: ".82rem", color: C.text }}>{result}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE: GALLERY
+═══════════════════════════════════════════════════════════════ */
+function GalleryPage({ goBack, canGoBack }) {
+  const categories = ["All", "Vehicles", "Competitions", "Team", "Testing", "Events"];
+  const [cat, setCat] = useState("All");
+  const placeholders = [
+    { cat: "Vehicles", label: "Sedna – AUV", year: "2014–16", photo: PHOTOS.sedna },
+    { cat: "Competitions", label: "MarinaX Victory", year: "2025", photo: PHOTOS.marinaWin },
+    { cat: "Team", label: "Team SRM AUV", year: "2024", photo: PHOTOS.team },
+    { cat: "Vehicles", label: "Alpheus – AUV Build", year: "2017", photo: PHOTOS.alpheus },
+    { cat: "Competitions", label: "TAC 2024, Norway", year: "2024", photo: PHOTOS.tacComp },
+    { cat: "Vehicles", label: "Zarna – AUV", year: "2018–19", photo: PHOTOS.zarna },
+    { cat: "Vehicles", label: "Vatkhd – AUV", year: "2023–24", photo: PHOTOS.vatkhd },
+    { cat: "Vehicles", label: "NEMO – ROV", year: "2025–26", photo: PHOTOS.nemo },
+    { cat: "Team", label: "Team Lead", year: "2024", photo: PHOTOS.teamLead },
+    { cat: "Team", label: "Mechanical Lead", year: "2024", photo: PHOTOS.mechanicalLead },
+    { cat: "Team", label: "Electrical Lead", year: "2024", photo: PHOTOS.electricalLead },
+    { cat: "Team", label: "Software Lead", year: "2024", photo: PHOTOS.softwareLead },
+    { cat: "Team", label: "Team Manager", year: "2024", photo: PHOTOS.teamManager },
+  ];
+  const filtered = cat === "All" ? placeholders : placeholders.filter(p => p.cat === cat);
+  return (
+    <div className="page-enter">
+      <PageHero title="Photo" accent="Gallery" breadcrumb="Home / Gallery" subtitle="Moments from competitions, testing sessions, and team milestones" onBack={goBack} canGoBack={canGoBack} />
+      <div style={{ background: C.bg1, padding: "clamp(40px,8vw,80px) clamp(1rem,4vw,2rem)" }}>
+        <div style={{ maxWidth: 1300, margin: "0 auto" }}>
+          {/* Filter tabs */}
+          <Reveal>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 48, justifyContent: "center" }}>
+              {categories.map(c => (
+                <button key={c} onClick={() => setCat(c)} style={{ padding: "8px 22px", background: cat === c ? `linear-gradient(135deg,${C.accent},${C.accent2})` : "transparent", color: cat === c ? C.bg0 : C.muted, border: `1px solid ${cat === c ? "transparent" : C.border}`, borderRadius: 6, fontFamily: "'Orbitron',monospace", fontSize: 9, letterSpacing: 2, cursor: "pointer", fontWeight: cat === c ? 700 : 400, transition: "all .3s" }}>{c}</button>
+              ))}
+            </div>
+          </Reveal>
+          {/* Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(min(280px,100%),1fr))", gap: 14 }}>
+            {filtered.map((p, i) => (
+              <Reveal key={p.label} delay={(i % 6) * 60}>
+                <GalleryItem label={p.label} year={p.year} cat={p.cat} photo={p.photo} />
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GalleryItem({ label, year, cat, photo }) {
+  const [h, setH] = useState(false);
+  const colors = { Vehicles: C.accent, Competitions: "#FFD700", Team: C.accent3, Testing: C.accent2, Events: "#48CAE4" };
+  const color = colors[cat] || C.accent;
+  return (
+    <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      style={{ borderRadius: 12, overflow: "hidden", border: `1px solid ${h ? color + "50" : C.border}`, transition: "all .4s", transform: h ? "scale(1.02)" : "none", boxShadow: h ? `0 16px 40px rgba(0,0,0,.6), 0 0 20px ${color}18` : "none", cursor: "pointer" }}>
+      <div style={{ position: "relative", height: 220, overflow: "hidden" }}>
+        <img src={photo} alt={label}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: cat === "Team" ? "center 15%" : "center center", display: "block", transition: "transform .5s ease", transform: h ? "scale(1.08)" : "scale(1)" }} />
+        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, rgba(10,25,47,0.85) 0%, transparent 55%)` }} />
+        {/* Category badge */}
+        <div style={{ position: "absolute", top: 10, left: 10, padding: "3px 10px", background: `${color}25`, border: `1px solid ${color}50`, borderRadius: 999, fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: color, backdropFilter: "blur(8px)", letterSpacing: 2 }}>{cat}</div>
+        {/* Hover overlay */}
+        {h && (
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.2)", display: "flex", alignItems: "center", justifyContent: "center", animation: "fadeIn .2s ease" }}>
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(0,229,255,0.2)", border: `1px solid ${C.accent}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🔍</div>
+          </div>
+        )}
+      </div>
+      <div style={{ padding: "12px 16px", background: C.bg3 }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: color, letterSpacing: 3, marginBottom: 4 }}>{year}</div>
+        <div style={{ fontFamily: "'Syne',sans-serif", fontSize: ".85rem", color: C.text, fontWeight: 500 }}>{label}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE: CONTACT
+═══════════════════════════════════════════════════════════════ */
+function ContactPage({ goBack, canGoBack }) {
+  const [form, setForm] = useState({ name: "", email: "", org: "", type: "general", msg: "" });
+  const [sent, setSent] = useState(false);
+  const input = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+  const inputStyle = { width: "100%", padding: "13px 16px", background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}`, borderRadius: 8, color: "#fff", fontFamily: "'Syne',sans-serif", fontSize: ".9rem", outline: "none", transition: "border-color .3s", boxSizing: "border-box" };
+  return (
+    <div className="page-enter">
+      <PageHero title="Contact" accent="Us" breadcrumb="Home / Contact" subtitle="Get in touch for sponsorships, collaborations, or general inquiries" onBack={goBack} canGoBack={canGoBack} />
+      <div style={{ background: C.bg1, padding: "clamp(40px,8vw,80px) clamp(1rem,4vw,2rem)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 64 }} id="contact-form" className="two-col-contact">
+            {/* Info */}
+            <div>
+              <Reveal>
+                <SectionLabel text="Connect" />
+                <SectionTitle>Let's <Accent>Talk</Accent></SectionTitle>
+                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".95rem", color: C.muted, lineHeight: 1.9, margin: "16px 0 36px" }}>Whether you're interested in sponsoring our team, collaborating on research, or joining us — we'd love to hear from you.</p>
+              </Reveal>
+              {[
+                { icon: "📧", label: "Email", value: "srmauvteam@gmail.com" },
+                { icon: "📸", label: "Instagram", value: "@srm.auv" },
+                { icon: "📍", label: "Location", value: "SRM IST, Kattankulathur, Chennai – 603203" },
+              ].map(({ icon, label, value }, i) => (
+                <Reveal key={label} delay={i * 80}>
+                  <div style={{ display: "flex", gap: 16, padding: "18px 20px", background: "rgba(0,229,255,0.03)", border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: 12 }}>
+                    <span style={{ fontSize: 20, flexShrink: 0 }}>{icon}</span>
+                    <div>
+                      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.accent, letterSpacing: 3, marginBottom: 4 }}>{label.toUpperCase()}</div>
+                      <div style={{ fontFamily: "'Syne',sans-serif", fontSize: ".88rem", color: C.text }}>{value}</div>
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+              <Reveal delay={240}>
+                <div style={{ marginTop: 32, padding: 24, background: "rgba(0,229,255,0.04)", border: `1px solid ${C.border}`, borderRadius: 12 }}>
+                  <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.accent, letterSpacing: 3, marginBottom: 12 }}>SPONSORSHIP</div>
+                  <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".875rem", color: C.muted, lineHeight: 1.7 }}>Interested in sponsoring Team SRM AUV? We offer brand exposure at national/international competitions, digital platforms, and more.</p>
+                </div>
+              </Reveal>
+            </div>
+
+            {/* Form */}
+            <Reveal delay={100}>
+              <GlassCard style={{ padding: 44 }} hover={false}>
+                {sent ? (
+                  <div style={{ textAlign: "center", padding: "60px 0" }}>
+                    <div style={{ fontSize: 56, marginBottom: 20 }}>✅</div>
+                    <h3 style={{ fontFamily: "'Orbitron',monospace", color: C.accent, fontSize: "1.1rem", marginBottom: 12 }}>Message Sent!</h3>
+                    <p style={{ fontFamily: "'Syne',sans-serif", color: C.muted }}>We'll get back to you shortly.</p>
+                    <button onClick={() => setSent(false)} style={{ marginTop: 24, background: "none", border: `1px solid ${C.border}`, color: C.muted, padding: "8px 18px", borderRadius: 6, cursor: "pointer", fontFamily: "'Syne',sans-serif", fontSize: ".85rem" }}>Send another</button>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                    <h3 style={{ fontFamily: "'Orbitron',monospace", fontSize: ".95rem", color: "#fff", marginBottom: 8 }}>Send a Message</h3>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }} className="form-row">
+                      <input placeholder="Your Name *" value={form.name} onChange={input("name")} style={inputStyle} onFocus={e => e.target.style.borderColor = C.accent} onBlur={e => e.target.style.borderColor = C.border} />
+                      <input placeholder="Email Address *" type="email" value={form.email} onChange={input("email")} style={inputStyle} onFocus={e => e.target.style.borderColor = C.accent} onBlur={e => e.target.style.borderColor = C.border} />
+                    </div>
+                    <input placeholder="Organization / College" value={form.org} onChange={input("org")} style={inputStyle} onFocus={e => e.target.style.borderColor = C.accent} onBlur={e => e.target.style.borderColor = C.border} />
+                    <select value={form.type} onChange={input("type")} style={{ ...inputStyle, cursor: "pointer" }}>
+                      <option value="general">General Inquiry</option>
+                      <option value="sponsorship">Sponsorship</option>
+                      <option value="collaboration">Research Collaboration</option>
+                      <option value="recruitment">Join the Team</option>
+                      <option value="media">Media / Press</option>
+                    </select>
+                    <textarea placeholder="Your message..." value={form.msg} onChange={input("msg")} rows={5} style={{ ...inputStyle, resize: "vertical" }} onFocus={e => e.target.style.borderColor = C.accent} onBlur={e => e.target.style.borderColor = C.border} />
+                    <Btn primary onClick={() => {
+                      if (form.name && form.email && form.msg) {
+                        // Open mailto with pre-filled content
+                        const subject = encodeURIComponent(`[${form.type.toUpperCase()}] Message from ${form.name}`);
+                        const body = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\nOrganization: ${form.org || 'N/A'}\nType: ${form.type}\n\nMessage:\n${form.msg}`);
+                        window.open(`mailto:srmauvteam@gmail.com?subject=${subject}&body=${body}`, '_blank');
+                        setSent(true);
+                      }
+                    }}>Send Message</Btn>
+                  </div>
+                )}
+              </GlassCard>
+            </Reveal>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════════════ */
+function Footer({ setPage }) {
+  const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  return (
+    <footer style={{ background: C.bg0, borderTop: `1px solid ${C.border}`, padding: "60px 2rem 32px" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr", gap: 48, marginBottom: 48 }} className="footer-grid">
+          {/* Brand */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <div style={{ width: 42, height: 42, borderRadius: "50%", overflow: "hidden", border: `2px solid rgba(0,229,255,0.4)`, boxShadow: `0 0 12px rgba(0,229,255,0.25)`, flexShrink: 0 }}>
+              <img src={PHOTOS.logo} alt="Team SRM AUV Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+              <div>
+                <div style={{ fontFamily: "'Orbitron',monospace", fontWeight: 800, fontSize: 12, color: C.accent, letterSpacing: 1.5 }}>TEAM SRM AUV</div>
+                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 8, color: C.muted, letterSpacing: 2 }}>EST. 2013</div>
+              </div>
+            </div>
+            <p style={{ fontFamily: "'Syne',sans-serif", fontSize: ".85rem", color: C.muted, lineHeight: 1.8, maxWidth: 260 }}>Engineering Depths, Navigating Future. SRM Institute of Science & Technology, Chennai.</p>
+          </div>
+          {/* Nav groups */}
+          {[
+            { title: "Navigate", links: [["home", "Home"], ["about", "About"], ["team", "Team"]] },
+            { title: "Projects", links: [["vehicles", "Vehicles"], ["nemo", "NEMO"], ["achievements", "Achievements"]] },
+            { title: "Connect", links: [["competitions", "Competitions"], ["gallery", "Gallery"], ["contact", "Contact"]] },
+          ].map(({ title, links }) => (
+            <div key={title}>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: C.accent, letterSpacing: 4, marginBottom: 20, textTransform: "uppercase" }}>{title}</div>
+              {links.map(([p, l]) => (
+                <button key={p} onClick={() => go(p)} style={{ display: "block", background: "none", border: "none", fontFamily: "'Syne',sans-serif", fontSize: ".875rem", color: C.muted, cursor: "pointer", marginBottom: 10, textAlign: "left", transition: "color .25s" }}
+                  onMouseEnter={e => e.target.style.color = C.accent}
+                  onMouseLeave={e => e.target.style.color = C.muted}>{l}</button>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: C.muted }}>© 2025 Team SRM AUV · All rights reserved · srmauvteam@gmail.com</div>
+          <div style={{ display: "flex", gap: 16 }}>
+            {["Instagram", "Email"].map(s => (<div key={s} style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: C.muted, cursor: "pointer" }}>{s}</div>))}
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL PROGRESS BAR
+═══════════════════════════════════════════════════════════════ */
+function ScrollProgress() {
+  const [pct, setPct] = useState(0);
+  useEffect(() => {
+    const h = () => {
+      const s = document.documentElement.scrollTop;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setPct(max > 0 ? (s / max) * 100 : 0);
+    };
+    window.addEventListener("scroll", h);
+    return () => window.removeEventListener("scroll", h);
+  }, []);
+  return <div style={{ position: "fixed", top: 0, left: 0, height: 2, width: `${pct}%`, background: `linear-gradient(90deg,${C.accent},${C.accent2})`, zIndex: 300, transition: "width .1s" }} />;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ROOT APP
+═══════════════════════════════════════════════════════════════ */
+function App() {
+  const [page, setPage] = useState("home");
+  const [history, setHistory] = useState(["home"]);
+
+  const navigate = (p) => {
+    setHistory(prev => [...prev, p]);
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goBack = () => {
+    if (history.length > 1) {
+      const newHistory = history.slice(0, -1);
+      setHistory(newHistory);
+      const prev = newHistory[newHistory.length - 1];
+      setPage(prev);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const canGoBack = history.length > 1;
+
+  const renderPage = () => {
+    switch (page) {
+      case "home":         return <HomePage setPage={navigate} />;
+      case "about":        return <AboutPage goBack={goBack} canGoBack={canGoBack} />;
+      case "team":         return <TeamPage goBack={goBack} canGoBack={canGoBack} />;
+      case "vehicles":     return <VehiclesPage setPage={navigate} goBack={goBack} canGoBack={canGoBack} />;
+      case "nemo":         return <NemoPage setPage={navigate} goBack={goBack} canGoBack={canGoBack} />;
+      case "achievements": return <AchievementsPage goBack={goBack} canGoBack={canGoBack} />;
+      case "competitions": return <CompetitionsPage goBack={goBack} canGoBack={canGoBack} />;
+      case "gallery":      return <GalleryPage goBack={goBack} canGoBack={canGoBack} />;
+      case "contact":      return <ContactPage goBack={goBack} canGoBack={canGoBack} />;
+      default:             return <HomePage setPage={navigate} />;
+    }
+  };
+
+  return (
+    <>
+      <GlobalStyle />
+      <ScrollProgress />
+      <Navbar page={page} setPage={navigate} goBack={goBack} canGoBack={canGoBack} />
+      <main style={{ paddingTop: 64 }}>
+        {renderPage()}
+      </main>
+      <Footer setPage={navigate} />
+    </>
+  );
+}
+
+
+
+  
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
