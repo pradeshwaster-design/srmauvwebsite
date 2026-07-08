@@ -12,7 +12,7 @@
   [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
   
-  [Live Demo](https://srmauv.vercel.app) • [Report Bug](https://github.com/pradeshwaster-design/srmauvwebsite/issues) • [Request Feature](https://github.com/pradeshwaster-design/srmauvwebsite/issues)
+  [Live Demo](https://teamsrmauv.netlify.app/) • [Report Bug](https://github.com/pradeshwaster-design/srmauvwebsite/issues) • [Request Feature](https://github.com/pradeshwaster-design/srmauvwebsite/issues)
 </div>
 
 ---
@@ -195,7 +195,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the complete evolution from v1 prototype �
 
 - **Competition**: [RoboSub](https://www.robosub.org/)
 - **Team Repository**: [github.com/pradeshwaster-design/srmauvwebsite](https://github.com/pradeshwaster-design/srmauvwebsite)
-- **Live Site**: [https://srmauv.vercel.app](https://srmauv.vercel.app) *(placeholder)*
+- **Live Site**: [https://teamsrmauv.netlify.app/](https://teamsrmauv.netlify.app/)
 
 ---
 
