@@ -6,7 +6,7 @@
   "description": "Official website for Team SRM AUV — A multidisciplinary student engineering team building intelligent autonomous underwater vehicles at SRM Institute of Science and Technology, Chennai.",
   "author": "Team SRM AUV <team-srm-auv@srmist.edu.in>",
   "license": "MIT",
-  "homepage": "https://github.com/pradeshwaster-design/srmauvwebsite#readme",
+  "homepage": "https://teamsrmauv.netlify.app/",
   "repository": {
     "type": "git",
     "url": "https://github.com/pradeshwaster-design/srmauvwebsite.git"
